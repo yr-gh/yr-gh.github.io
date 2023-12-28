@@ -1,0 +1,113 @@
+---
+title: "Resource List"
+author: "Rui Yang"
+date: "11/22/2023"
+format:
+  html:
+    toc: true
+    toc-depth: 6
+---
+
+## Bash
+
+### Notes
+
+### Get started
+
+1. **Linux Command Line and Shell Scripting Bible** by Richard Blum.
+
+## R
+
+### Notes
+
+### Get started
+
+1. **Official documentations** at <https://cran.r-project.org/manuals.html>.
+
+2. **Hands-on programming with R** by Garrett Grolemund at <https://rstudio-education.github.io/hopr>.
+
+3. **Advanced R** by Hadley Wickham at <https://adv-r.hadley.nz/>.
+
+### Tidyverse series packages
+
+A collection of packages for **data science** at <https://github.com/tidyverse>.
+
+Including:
+
+* I/O of delimited data: `vroom`, `readr`.
+
+* Giving you a modern data frame: `tibble`.
+
+* Data manipulation: `dplyr`.
+
+* Giving you tidy data: `tidyr`.
+
+* Working with strings: `stringr`.
+
+* Working with factors: `forcats`.
+
+* Working with functions and vectors: `purrr`.
+
+* Working with dates and date-times: `lubridate`.
+
+* Working with time-of-day values: `hms`.
+
+* Working with binary data: `blob`.
+
+* Working with pipes: `magrittr`.
+
+* Formatting your strings: `glue`.
+
+* Data visualization with 2D plot: `ggplot2` at <https://ggplot2-book.org>.
+
+### Bioconductor series packages
+
+A collection of packages for bioinfomatics at <https://bioconductor.org>.
+
+#### Bulk omics
+
+* Differential expression analysis: `DESeq2`.
+
+* Differential binding analysis: `DiffBind`.
+
+#### Other packages
+
+* Enrichment analysis and visualization: `clusterProfiler` at <https://yulab-smu.top/biomedical-knowledge-mining-book/index.html>.
+
+### Futureverse series packages
+
+A unifying parallelization framework at <https://www.futureverse.org/>.
+
+### Single-cell omics
+
+* Single-cell multi-omics: `Seurat`.
+
+* Single-cell chromatin data: `Signac`.
+
+### Bulk omics
+
+### Bioinformatics packages
+
+### Other packages
+
+## Julia
+
+### Notes
+
+#### Basics
+
+1. [Basic language syntax](./Resources/Programming/Julia/Basics/Julia_Basics.html).
+
+### Get started
+
+1. **Julia as a second language** by Erik Engheim.
+
+2. **Julia language guide** by Dongfeng Li at <https://www.math.pku.edu.cn/teachers/lidf/docs/Julia/html/_book/index.html>.
+
+3. **Julia official documentation** at <https://docs.julialang.org/en/v1>.
+
+### Julia for data science
+
+1. **Julia language guide** by Dongfeng Li at <https://www.math.pku.edu.cn/teachers/lidf/docs/Julia/html/_book/index.html>.
+
+2. **Julia data science** at <https://juliadatascience.io>.

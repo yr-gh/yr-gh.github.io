@@ -1,0 +1,2672 @@
+---
+title: "Julia Basics"
+author: "Rui Yang"
+date: "11/16/2023"
+format:
+  html:
+    toc: true
+    toc-depth: 6
+jupyter: julia-1.9
+---
+
+## Julia pros and cons
+
+### Pros
+
+-   Interactive programming
+
+Julia is a dynamically typed language, in contrast with statically typed languages.
+
+-   High performance
+
+Julia uses just-in-time compilation (JIT), compilation at run time.
+
+Typically, JIT continuously analyses the code being executed and identifies parts of the code where the speedup gained from compilation or recompilation would outweigh the overhead of compiling that code.
+
+Therefore, JIT combines advantages of ahead-of-time compilation (AOT, compilation before execution) and interpretation.
+
+Due to the ecosystem of packages, Julia is really suitable for scientific computing, but it can also be used as a general-purpose programming language.
+
+### Cons
+
+Julia starts more slowly than Python, R, etc. but begins to run faster once the JIT compiler has converted critical parts of the code to machine code; thus it's not suitable for:
+
+-   Programming small, short-running scripts.
+
+-   Real-time systems (Julia implements automatic garbage collection, which tends to introduce small random delays).
+
+-   System programming (it needs detailed control of resource usage).
+
+-   Embedded systems with limited memory.
+
+## Basics
+
+### Arithmetic operations and number types
+
+#### Arithmetic operations
+
+Addition, subtraction, multiplication, division, and power: `+ - * / ^`.
+
+#### Number types
+
+-   Signed integers: `Int8`, `Int16`, `Int32`, `Int64` (default), `Int128`, `BigInt`.
+
+-   Unsigned integers: `UInt8`, `UInt16`, `UInt32`, `UInt64`, `UInt128`.
+
+You can check the minimum and maximum values of a certain integer type with `typemin()` and `typemax()`.
+
+You can check the type of the input argument with `typeof()`.
+
+Julia defaults to showing all signed integers in decimal format, and all unsigned integers in hexadecimal format.
+
+In fact, what is stored in memory is no difference. The only difference is how to interpret it. You can use the `reinterpret()` function to see how the exactly same bits in memory can be interpreted differently.
+
+-   Floating-point numbers: `Float16`, `Float32`, `Float64` (default).
+
+You can type a `Float32` number by suffixing `f0`: `3.14f0`.
+
+-   `Rational` type: `2 // 5` represents a rational number $\frac{2}{5}$.
+
+-   `Complex` type: `1 + 2im`.
+
+#### Arithmetic operations for integers
+
+-   `/` always gives floating-point number
+
+```{julia}
+4 / 2
+```
+
+-   `÷` or `div()` gives the quotient
+
+```{julia}
+5 ÷ 3
+```
+
+```{julia}
+div(5, 3)
+```
+
+-   `%` or `rem()` gives the remainder
+
+```{julia}
+5 % 3
+```
+
+```{julia}
+rem(5, 3)
+```
+
+-   `divrem()` gives both quotient and remainder
+
+```{julia}
+divrem(5, 3)
+```
+
+::: callout-caution
+Typically, operations on the same type of values always give the same type of value, even though overflow may occur.
+
+Even though overflow will occur, Julia won't give any prompt.
+:::
+
+### Variables
+
+In julia, identifiers can be used to give names to constants, variables, types, and functions.
+
+Variables defining memory addresses where values are stored, are only references to values, because Julia allocates memory based on values, not variables.
+
+In comparison with this, statically typed languages allocate memory based on variables, so you must first decalre the type of a variable (e.g., `int`) before using it, which will allocate a predefined size (which depends on the type of the variable) in a predefined location in memory to this variable. As a consequence, you should never attempt to assign a value that cannot fit inside the memory slot set aside for the variable to this variable.
+
+1.  The equal sign (`=`) operator is used to assign values to variables (i.e., let a variable point to a value):
+
+```{julia}
+x = 1
+```
+
+2.  Allowed variable names:
+
+-   Leading characters: letters, underscore, Unicode code points greater than 00A0.
+
+-   Subsequent characters: other Unicode code points.
+
+-   Variable names containing only underscores can only be assigned values, which are immediately discarded.
+
+-   Explicitly disallowed variable names: built-in keywords.
+
+::: callout-tip
+To type many special characters, like Unicode math symbols, you can type the backslashed LaTeX symbol name followed by tab.
+
+If you find a symbol elsewhere, which you don't know how to type, the REPL help will tell you: just type ? and then paste the symbol.
+:::
+
+3.  My own rules for clarity:
+
+-   Can only contain letters, underscore, and numbers.
+
+-   Can only start with letters.
+
+4.  Two special variables:
+
+-   Constants: defined with the `const` keyword.
+
+```{julia}
+const my_pi = 3.14
+```
+
+::: callout-note
+You can still assign a new value **with the same type as the original one** to a constant, but a warning is printed.
+:::
+
+-   The `ans` variable: in interactive mode, Julia REPL assigns the value of the last expression to the `ans` (answer) variable.
+
+5.  Literal coefficient
+
+In mathematics, `3×x + 2×y` may be written as `3x + 2y`. Julia lets you write a multiplication in the same manner. We refer to this as literal coefficient, which is a shorthand for multiplication between **a number literal** and **a constant or variable**:
+
+```{julia}
+#| eval: false
+
+x = 3
+2x
+
+2*(3+2)
+2(3+2)
+
+2*π
+2π
+```
+
+### Relation and logical operations
+
+#### Relation operations
+
+`==, != or ≠, <, >, <= or ≤, >= or ≥`
+
+The operation result is `true` or `false`, which is `Bool` type.
+
+#### Logical operations
+
+`&&, ||, !`
+
+The logical evaluation is lazy.
+
+Suppose `i = 10`, and then `1 <= i <= 100` is equivalent to `i >= 1 && i <= 100`.
+
+### Control flow
+
+#### Comment
+
+In Julial, you can give an inline comment by using `#`, or multiline comment by using `#=...=#`.
+
+#### Compound expressions
+
+To have a single expression which evaluates several subexpressions in order, returning the value of the last subexpression as its value.
+
+1.  `;` chain
+
+Put all subexpressions separated by `;` inside parentheses.
+
+```{julia}
+z = (x = 1; y = 2; x + y)
+
+# or
+z = (x = 1;
+     y = 2;
+     x + y)
+
+z
+```
+
+1.  `begin` block
+
+Put all subexpressions separated by a newline character between `begin` and `end` keywords.
+
+You can also put all subexpressions in one line by separating them with `;`.
+
+```{julia}
+z = begin
+    x = 1
+    y = 2
+    x + y
+    end
+
+# or
+z = begin x = 1; y = 2; x + y end
+
+z
+```
+
+This is quite useful with the inline function definition.
+
+::: callout-note
+For multiple statements, you can put them in one line and separate them with `;`, which is not the same thing as compound expressions:
+
+```{julia}
+x = 1 + 2; println("x=$x")
+```
+:::
+
+#### Short-circuit evaluation
+
+1.  `cond && expr`: evaluate `expr` if and only if `cond` is `true`.
+
+2.  `cond || expr`: evaluate `expr` if and only if `cond` is `false`.
+
+#### Conditional evaluation
+
+```{julia}
+#| eval: false
+
+if cond1
+    statements
+elseif cond2
+    statements
+...
+else
+    statements
+end
+```
+
+::: callout-note
+Ternary operator: `cond ? expr1 : expr2`, which is closely equivalent to `if cond expr1 else expr2`.
+:::
+
+#### Looping
+
+1.  `while`
+
+```{julia}
+#| eval: false
+
+while cond
+    statements
+end
+```
+
+2.  'for'
+
+```{julia}
+#| eval: false
+
+for var in iterable
+    statements
+end
+```
+
+For `for` loop, `var in iterable`, `var ∈ iterable`, and `var = iterable` are equivalent to one another!
+
+::: {#nte-memberoperator .callout-note title="Member operator `in` or `∈`"}
+1.  `in(collection)` or `∈(collection)` creates a function which checks whether its argument is in collection:
+
+```{julia}
+f = in(1:10)
+
+f(1)
+```
+
+Note: `start:stop` will generate a number sequence with step 1; `start:step:stop` with step `step`.
+
+2.  `in(item, collection)` or `∈(item, collection)` determines whether an item is in the given collection:
+
+```{julia}
+in(1, 1:10)
+```
+
+3.  Sets check whether the item is equal to one of the elements:
+
+```{julia}
+1 in Set(1:10)
+```
+
+4.  Dicts look for `key=>value` pairs:
+
+```{julia}
+(1=>10) in Dict(1=>10, 2=>20)
+```
+
+5.  `in.(items, collection)` or `items .∈ collection` checks whether each value in `items` and each value in `collection` at the corresponding position are the same one:
+
+If either `items` or `collection` contains only one element, it will be broadcasted to the same length as the longer.
+
+```{julia}
+in.([1, 3, 2], [1, 4, 2])
+```
+
+6.  `in.(items, Ref(collection))` or `items .∈ Ref(collection)` checks whether each value in `items` is in `collection`:
+
+`Ref(collection)` can also be written as `(collection,)` (i.e. wrap `collection` in a tuple or a `Ref`).
+
+Note: create a tuple containing only one element with `(1,)`.
+
+```{julia}
+in.([1, 3, 2], Ref([8, 6, 1, 4, 3, 2]))
+```
+
+`in.` does not support infix form!
+
+`in`, `∈`, and `.∈` support both forms!
+
+In contrary to `∈` (`\in<tab>`), `∋` (`\ni<tab>`), and `.∈`, we have, `∉` (`\notin<tab>`), `∌` (`\nni<tab>`), and `.∉`.
+:::
+
+#### Jump out of loops
+
+1.  `break`: jump out of the loop in which `break` is.
+
+2.  `continue`: stop an interation and move on to the next one.
+
+3.  `@goto name` and `@label name`: `@goto name` unconditionally jumps to the statement at the location `@label name`.
+
+### Functions
+
+#### Inline functions
+
+`<function name>(<parameters>) = <expression>`:
+
+```{julia}
+cylinder_volume(r, h) = π*r^2*h
+
+cylinder_volume(5, 3)
+```
+
+#### Multiline functions
+
+```{julia}
+#| eval: false
+
+function <function name>(parameters)
+    ...
+end
+```
+
+In Julia, `return <value>` is not necessary. **It is only used when you need to exit a function early; otherwise the value of the last expression will always be returned.**
+
+::: callout-note
+Functions are central to Julia! Various interfaces are achieved by functions even though they don't look like functions.
+
+-   Infix form
+
+```{julia}
+5 + 3
+```
+
+-   Prefix form
+
+```{julia}
++(5 + 3 + 5)
+```
+
+If a function with a symbol name takes two arguments, we can use it by infix form:
+
+```{julia}
+↔(x, y) = x^2 + y^2
+
+6 ↔ 6
+```
+:::
+
+#### Argument passing behaviour
+
+Pass-by-sharing!
+
+#### Specify the type of return value
+
+You can specify the type of return value of a function in the form `FuncName(parameters)::ReturnType`.
+
+If the type of return value is not the given type, a conversion is attempted with `convert()`.
+
+```{julia}
+foo(x::Int64) :: Int32 = 2x
+
+typeof(foo(6))
+```
+
+#### Multiple assignments and multiple return values
+
+1.  Multiple assignments
+
+Achieved by using (named) tuples.
+
+```{julia}
+#| eval: false
+
+(a, b, c) = 1:3  # Assign each variable a value; parentheses are optional
+
+_, _, a = 1:3  # Use _ to discard unwanted values
+
+a, b..., c = 1:6  # a -> 1, b -> 2:5, c -> 6; b... indicates that b is a collection (b doesn't need to be the final one)
+
+(; b, a) = (a=1, b=2, c=3)  # Assign values to variables based on names
+```
+
+2.  Multiple return values
+
+#### Parameter types
+
+1.  Positional parameters: non-optional; optional with defaults.
+
+2.  Keyword parameters: non-optional; optional with defaults.
+
+```{julia}
+#| eval: false
+
+(a, b = 1; c, d = 2)  # Keyword arguments are defined after ;
+
+# Positional arguments: a, b (optional)
+# Keyword arguments: c, d (optional)
+
+# When you pass arguments, either will be fine:
+(1, 2; c = 3, d = 4)  # Separated by ;
+(1, 2, c = 3, d = 4)  # Separated by ,
+```
+
+::: callout-important
+Multiple dispatch only considers **positional arguments**.
+:::
+
+#### Anonymous functions
+
+Anonymous functions play an important role in functional programming.
+
+An anonymous function can be defined in two ways:
+
+1.  Inline style: `(<parameters>) -> <expression>` (`()` can be omitted if it only has a single parameter).
+
+2.  Multiline style:
+
+```{julia}
+#| eval: false
+
+function (<parameters>)
+    ...
+end
+```
+
+#### The splat operator `...`
+
+The splat operator can be used to turn arrays or tuples into function arguments.
+
+e.g. `foo([1, 2, 3]...)` is the same as `foo(1, 2, 3)`.
+
+You can define a parameter which accepts a variable number of arguments by using the splat operator:
+
+```{julia}
+#| eval: false
+
+# All arguments except the 1st will be stored in a tuple, assigned to args
+function var_f(x, args...)
+    ...
+end
+```
+
+#### Closure
+
+A function (inner function) **with references which are used locally, but defined in an enclosing scope (e.g. outer function)** is **defined inside another function (outer function)** and **returned by that function**. Then, when calling the outer function, the inner function will be returned with an environment, recording some state of outer function.
+
+```{julia}
+function make_pow(n::Real)  # Outer function
+    function (x::Real)  # Inner function
+        x^n  # The inner function uses n defined outside it
+    end
+end
+
+pow2 = make_pow(2)  # The returned function with n=2 is assigned to variable pow2
+pow3 = make_pow(3)
+
+pow2(2), pow3(2)
+```
+
+### Exception
+
+Usage:
+
+```{julia}
+#| eval: false
+
+try
+    <some code which may raise some errors>
+catch <exception variable>
+    <some code dealing with exceptions>
+finally
+    <some code which need to be executed anyway>
+end
+```
+
+e.g.
+
+```{julia}
+x = [2, -2, 'a']
+
+for i in x
+    try
+        y = sqrt(i)
+        println("√", i, " = ", y)
+    catch e
+        if isa(e, DomainError)
+            println("√", i, ": $(i) is out of domain")
+        else
+            println("√", i, ": $(i) is an unsopported type")
+        end
+    end
+end
+```
+
+### Metaprogramming
+
+Generating code by code!
+
+#### Macros
+
+Add some code to existed code before compilation, so we can add some new properties to existed code without modifying it.
+
+For example, we can use the `@time` macro to test the running speed of some code (actually, it adds some code of monitoring the consumption of some computing resources before and after the original code to achieve this function).
+
+##### Useful macros
+
+1.  `@show`: prints one or more expressions, and their results.
+
+```{julia}
+x = ["abc", "def"]
+
+@show x
+```
+
+### Types
+
+#### Basics
+
+In Julia, all are objects having a type, and types are first-class objects.
+
+-   You can use `typeof()` to get the type of any object.
+
+-   You can find the supertype of any type with `supertype()`: the root of type hierarchy is `Any`.
+
+-   You can find the subtypes of any type with `subtypes()`: if there is no subtype for a given type, it will return `Type[]`.
+
+-   You can check whether a type is a subtype of the other with the `<:` operator (e.g. `String <: Any`).
+
+-   Seeing that you created an empty array with the type `Integer`, then you can only add elements with the type `Integer` or its subtypes to this array.
+
+::: {.callout-note title="Primitive and composite types"}
+We can roughly divide all types into primitive types (concrete types whose data consists of plain old bits) and composite types (derived from primitive types or other composite types). On the other hand, we can also devide all types into abstract types (with zero fields) and concrete types (with fields).
+
+In Julia, there are three primitive types: integers, floating-point numbers and characters. You can use the function `isprimitivetype()` to check whether a type is a primitive type (e.g. `isprimitivetype(Int8)`).
+
+It's possible to define new primitive types in Julia by using `primitive type ... end`.
+:::
+
+You can create composite types from primitive types or composite types:
+
+-   Definition of an **immutable** composite type:
+
+```{julia}
+#| eval: false
+
+struct TypeName
+    # Defining typed fields here
+end
+```
+
+e.g.
+
+```{julia}
+#| eval: false
+struct Archer
+    name::String
+    health::Int
+    arrows::Int
+end
+
+# Once the composite type Archer is defined, you can instantiate the Archer object
+william = Archer("William Tell", 30, 24)
+
+# Then access the values of fileds by using dot operator
+william.name, william.health, william.arrows
+```
+
+::: callout-note
+In Julia, `::` is used to annotate variables and expression with types.
+
+`x::T` means variable `x` should have type `T`.
+:::
+
+-   Definition of a **mutable** composite type:
+
+```{julia}
+#| eval: false
+
+mutable struct TypeName
+    # Defining typed fields here
+end
+```
+
+-   Definition of abstract type: `abstract type TypeName end`.
+
+Obviously, the type created by using `struct` is a concrete type.
+
+You can create objects of a concrete type but not of an abstract type.
+
+An abstract type cannot have any fields. Only concrete types can have fields or a value.
+
+The purpose of abstract types is to facilitate the construction of type hierarchy.
+
+A **composite** type is a concrete type with fields; a **primitive** type is a concrete type with a single value.
+
+-   You can use the subtype operator `<:` to create a **concrete** or **abstract** subtype of an **abstract** type.
+
+```{julia}
+abstract type Warrior end
+
+# Archer is a subtype of Warrior
+struct ArcherSoldier <: Warrior
+    name::String
+    health::Int
+    arrows::Int
+end
+
+supertype(ArcherSoldier)
+```
+
+::: callout-note
+Different with object-oriented languages, composite types in Julia **can only have fields**, and **cannot have methods bound to them**.
+:::
+
+After creating concrete types, you can make objects of them (i.e. instantiate them) with arguments.
+
+::: callout-note
+You can only make objects of **concrete types**!
+:::
+
+e.g.
+
+```{julia}
+mutable struct TestType
+    a::Int64
+    b::Float64
+end
+
+t1 = TestType(1, 10.5)
+```
+
+You can instantiate objects of `TestType` in this way `t1 = TestType(1, 10.5)`, because Julia automatically creates a special function called **constructor** with the same name as your type. A constructor is responsible for making an instance (object) of the type it is associated with. Julia adds **two methods** to the constructor function, which takes the same number of arguments as you have fields. **One method uses type annotations for its arguments, as specified for each field in the `struct`**. **The other takes arguments of `Any` type**.
+
+```{julia}
+methods(TestType)
+```
+
+```{julia}
+function TestType(a::Int64)
+    TestType(a, a)
+end
+
+methods(TestType)
+```
+
+```{julia}
+TestType(100)
+```
+
+Surely, you can add methods to this constructor function outside of `struct` in the same manner as any other fucntion, called **outer constructor**.
+
+In addition, you can define accessors (getters and setters) as well as other functions accepted arguments of this type to achieve some tasks.
+
+You can only provide types without concrete parameters to define a function tied to types (this type of function are usually used to get some properties of a type, independent of its objects):
+
+```{julia}
+toy(::TestType) = 100
+
+t = TestType(100)
+toy(t)
+```
+
+In functions (including outer constructors) you defined outside of `struct`, you can easily check whether user-provided arguments are valid or not. But how can we check this when instantiating objects of a concrete type by using constructors Julia created?
+
+To solve this problem, we need to define the constructor inside of `struct`, called **inner constructor**. Once you do this, you tell Julia that you don't want it to create constructor methods automatically (i.e. disable this manner). Then, users can only use the constructor you defined to instantiate objects of a concrete type.
+
+```{julia}
+mutable struct TempType
+    a::Int64
+    b::Float64
+    diff::Float64
+
+    function TempType(a::Int64, b::Float64)
+        new(a, b, b - a)  # We don't want users to provide the value of diff, which is defined as the difference of b and a
+    end
+end
+```
+
+::: callout-note
+In inner constructor, you need use `new()` (which is only available inside an inner constructor) to instantiate objects of a concrete type, which accepts **zero or more** arguments **but never more aguments than the number of fields in your composite type**, because creating an inner constructor removes all constructor methods created by Julia. Feilds with missing values will be set to random values.
+:::
+
+```{julia}
+methods(TempType)
+```
+
+```{julia}
+TempType(1, 10.5)
+```
+
+```{julia}
+#| error: true
+
+# This will raise an error
+TempType(1, 10.5, 9.5)
+```
+
+#### Multiple dispatch
+
+##### How does multiple dispatch work
+
+```{julia}
+function myadd(x::Int, y::Int)
+    print("The sum is: ")
+    printstyled(x + y, "\n", bold = true, color = :red)
+end
+
+function myadd(x::String, y::String)
+    print("The concatenated string is: ")
+    printstyled(join([x, y]), "\n", bold = true, color = :red)
+end
+
+function myadd(x::Char, y::Char)
+    print("The character is: ")
+    printstyled(Char(Int(x) + Int(y)), "\n", bold = true, color = :red)
+end
+
+myadd(1, 1)
+myadd("abc", "def")
+myadd('W', 'Y')
+```
+
+How does Julia know which function should be called in this situation?
+
+-   In fact, we defined three **methods**, attached to the function `myadd`, instead of three **functions** above.
+
+-   In Julia, functions are just names. Without attached methods, they cannot do anything. **Code is always stored inside methods**. **The type of arguments** determines which method will get executed **at runtime**.
+
+-   You can use `methods()` to check how many methods a function contains (e.g. `methods(myadd)`).
+
+-   If some parameters without types specified, the type will be `Any` (i.e. accept all types of values).
+
+-   You can only define functions without methods:
+
+```{julia}
+#| error: true
+function func_no_method end
+
+func_no_method(1, 1)  # Attempt to call a function with no methods
+```
+
+```{julia}
+#| error: true
+
+func_not_defined(1, 1)  # Attempt to call a function not defined
+```
+
+##### The way Julia selects the correct method of a function for each situation
+
+Internally, Julia has a list of functions. Every function enters another list containing the methods, which deals with different argument type combinations.
+
+1.  First, Julia matches the function name (i.e. the called function should be defined).
+
+2.  Then, Julia matches the type combination of arguments and parameters (i.e. the combination of types of arguments passed = the combination of types of parameters defined in a method).
+
+In contrast with multiple dispatch, what method is used is decided only by the type of the first argument in single dispatch or object-oriented languages (i.e. in `a.join(b)`, the function (method) used is only decided by the object `a`, not decided by both `a` and `b`, because in object-oriented languages, various attributes and fuctions (methods) are bound to objects of a class). If you defined a function multiple times with arguments of different types in object-oriented languages, the previous will be overwritten by the latter.
+
+In statically typed languages which allows you to define a function multiple times with arguments of different types, when the code gts compiled, the compiler will pick the right function. But the selection process can only be done during compilation, it cannot be done during execution, which Julia can do.
+
+i.e. statically typed languages cannot deal with such a situation:
+
+```{julia}
+#| eval: false
+
+function f1(a::Warrior, b::Warrior)
+    f2(a, b)
+    # Some other statements
+end
+```
+
+In the function `f1`, defined above, `a` and `b` must be subtypes of the `Warrior` type. Suppose that the function `f1` is designed to allow accepting and dealing with these `a` and `b` with differnt subtypes of `Warrior`. When compiling the method `f1`, it only knows that `a` and `b` must be subtypes of `Warrior` but cannot know what concrete types they have. Then it won't pick up the right method of `f2` (suppose `f2` has at least two methods bound to it).
+
+#### Conversion and promotion
+
+##### Why do we need type promotion
+
+Inside a microprocessor, mathematical operations are always performed **between identical types of numbers**.
+
+Thus, when dealing with expressions composed of different number types, all higher-level programming languages have to convert all arguments in the expression **to the same number type**.
+
+But **what should this common number type be**? Figuring out this common type if what promotion is all about.
+
+In most mainstream languages, the mechanisms and rules governing number promotion are hardwired into the language and detaild in the specifications of the language.
+
+But Julia promotion rules are defined in the standard library, not in the internals of the Julia JIT compiler. This allows you to **extend** the existing system, **not modifying it**.
+
+::: callout-tip
+You can use the `@edit` macro to explore the Julia source code.
+
+By prefixing with the `@edit` macro, Julia jumps to the definition of the function called to handled the expression (e.g. `@edit 1+1`).
+
+Before using this, you may need to set the environment variable `JULIA_EDITOR` in your OS.
+:::
+
+##### How does type promotion work
+
+Julia performs type promotion by calling the `promote()` function, which promotes all arguments to a least common denominator.
+
+e.g. every arithmetic operation on some `Number` in Julia first calls `promote()` before performing the actual arithmetic operation.
+
+e.g. here, `promote()` promotes an integer and a floating-point number to floating-point numbers.
+
+```{julia}
+promote(1, 2.5)  # It returns a tuple
+```
+
+##### How does conversion work
+
+::: callout-caution
+Conversion means converting from one type to another **related** type.
+
+This is totally different from **parsing a text string to produce a number**, because a string and a number are not related types.
+:::
+
+For number type conversion, it is recommended to use the constructor of the type you want to convert to.
+
+```{julia}
+Int8(32)  # Convert a number of Int64 to Int8
+```
+
+Different from using type constructors, Julia calls the `convert()` function to achieve this.
+
+```{julia}
+convert(Int8, 32)
+```
+
+The first argument of `convert()` is a type object (we know that all are objects in Julia).
+
+Actually, the type of `Int64` is `Type{Int64}`.
+
+```{julia}
+Int64 isa Type{Int64}
+```
+
+You can regard `Type` as a function, accepting a type argument `T`, and then returning the type of `T` - `Type{T}`.
+
+##### An example extending the type system
+
+Here we give an example of defining units for angles (redian/degree) and related operations.
+
+###### Defining unit types and constructors
+
+```{julia}
+abstract type Angle end  # The super type of Radian and Degree
+
+struct Radian <: Angle
+    radians::Float64
+
+    # Defining customized constructor
+    function Radian(radians::Number=0.0)
+        new(radians)
+    end
+end
+
+# 1 degree = 60 minutes
+# 1 minute = 60 seconds
+# degrees, minutes, seconds (DMS)
+struct DMS <: Angle
+    seconds::Int
+
+    # Defining customized constructor
+    function DMS(degrees::Integer=0, minutes::Integer=0, seconds::Integer=0)
+        new(degrees * 60 * 60 + minutes * 60 + seconds)
+    end
+end
+```
+
+###### Defining accessors
+
+```{julia}
+radians(radian::Radian) = radian.radians
+
+seconds(dms::DMS) = dms.seconds % 60
+
+minutes(dms::DMS) = (dms.seconds ÷ 60) % 60
+
+degrees(dms::DMS) = (dms.seconds ÷ 60) ÷ 60
+```
+
+###### Displaying angles
+
+The Julia REPL environment uses the `show(io::IO, data)` to display data of some specific type to the user.
+
+```{julia}
+import Base: show
+
+function show(io::IO, radian::Radian)
+    print(io, radians(radian), "rad")
+end
+
+function show(io::IO, dms::DMS)
+    print(io, degrees(dms), "° ", minutes(dms), "' ", seconds(dms), "''")
+end
+```
+
+::: callout-caution
+Here, we only want to attach new methods to the `show()` function, which is already defined in the Base package.
+
+So we need to first import the `show()` function from the Base package; otherwise, it will automatically create a new function named `show`, which belongs to the namespace of Main, instead of Base, and then attach the newly defined method to this function.
+:::
+
+###### Defining type conversions
+
+```{julia}
+import Base: convert
+
+Radian(dms::DMS) = Radian(deg2rad(dms.seconds / 3600))
+DMS(radian::Radian) = DMS(floor(Int, rad2deg(radian.radians) * 3600))
+
+convert(::Type{Radian}, dms::DMS) = Radian(dms)
+convert(::Type{DMS}, radian::Radian) = DMS(radian)
+```
+
+###### Defining type promotions
+
+In fact, `promote()` does its job by calling the `promote_rule()` function.
+
+```{julia}
+import Base: promote_rule
+
+# If an expression contains both Radian and DMS, convert DMS into Radian
+promote_rule(::Type{Radian}, ::Type{DMS}) = Radian
+```
+
+###### Defining arithmetic operations
+
+```{julia}
+import Base: +, -
+
+# If an expression contains both Radian and DMS, convert DMS into Radian, and then perform arithmetic operations of Radian
++(θ::Angle, α::Angle) = +(promote(θ, α)...)
+-(θ::Angle, α::Angle) = -(promote(θ, α)...)
+
++(θ::Radian, α::Radian) = Radian(θ.radians + α.radians)
+-(θ::Radian, α::Radian) = Radian(θ.radians - α.radians)
+
++(θ::DMS, α::DMS) = DMS(θ.seconds + α.seconds)
+-(θ::DMS, α::DMS) = DMS(θ.seconds - α.seconds)
+```
+
+###### Making pretty literals by using literal coefficients
+
+```{julia}
+import Base: *, /
+
+*(coeff::Number, dms::DMS) = DMS(0, 0, coeff * dms.seconds)
+*(dms::DMS, coeff::Number) = coeff * dms
+/(dms::DMS, denom::Number) = DMS(0, 0, dms.seconds / denom)
+
+*(coeff::Number, radian::Radian) = Radian(coeff * radian.radians)
+*(radian::Radian, coeff::Number) = coeff * radian
+/(radian::Radian, denom::Number) = Radian(radian.radians / denom)
+
+const ° = DMS(1)
+const rad = Radian(1.0)
+```
+
+###### Overriding standard `sin()` and `cos()` functions to only accept `DMS` and `Radian`
+
+::: callout-caution
+In the following code snippet, we do not import `sin()` and `cos()` from the Base package, instead of overriding them (i.e. create a function and then attach the newly defined method to it).
+:::
+
+```{julia}
+# The standard sin() and cos() only accept numbers regarded as the radian
+sin(rad::Radian) = Base.sin(rad.radians)
+cos(rad::Radian) = Base.cos(rad.radians)
+
+sin(dms::DMS) = sin(Radian(dms))
+cos(dms::DMS) = cos(Radian(dms))
+```
+
+#### Representing unknown values
+
+1.  `nothing`: indicates something not existed.
+
+The `nothing` object is an instance of the type `Nothing`, which is a composite type without any fields.
+
+::: callout-note
+Every instance of a composite type with zero fields is the same obeject.
+
+```{julia}
+struct MyNothing
+    # No fields defined here
+end
+
+obj1 = MyNothing()
+obj2 = MyNothing()
+
+obj1 == obj2
+```
+
+Instances of different composite types with zero fields are different.
+
+```{julia}
+struct AgainNothing
+    # No fields defined here
+end
+
+obj1 = MyNothing()
+obj2 = AgainNothing()
+
+obj1 == obj2
+```
+:::
+
+2.  `missing`: indicates something, which should have existed, but missing due to some reason (i.e. unlike `nothing`, missing data actually exists in the real world, but we don't know what it is).
+
+The concept of `missing`, which is of type `Missing`, a composite type with zero fields, is the same as that in statistics.
+
+::: callout-caution
+Any expression containing `missing` will be evaluated to `missing`!
+
+You can use `skipmissing()` to filter `missing` out.
+:::
+
+3.  `NaN`: indicates something, which is **Not a Number**.
+
+**Similarly, `NaN` also propagates through all calculations.**
+
+The only difference of the propagation behaviour between `NaN` and `missing` is that `NaN` always returns `false` when `NaN` is used in a comparison expression, where `missing` always returns `missing`:
+
+```{julia}
+missing < 10, NaN < 10
+```
+
+::: callout-caution
+`0/0` returns `NaN`.
+
+In other words, `0/0` may be a valid number somewhere else, but now it doesn't belong to any number we have already defined; thus it is regarded as `NaN`.
+:::
+
+4.  `#undef`: indicates something undefined (i.e. a variable was not instantiated to a known value).
+
+e.g. Julia allows the construction of composite objects with uninitialized fields; however, it will throw an exception if you try to access an uninitialized field:
+
+::: callout-note
+Both `firstname` and `lastname` in the type `Person` have no type annotations. If you define them with type annotations, Julia will automatically instantiate them to some values based on their types.
+
+In other words, if some fields have no type annotations, then Julia has no way of guessing what the fields should be initialized to.
+:::
+
+```{julia}
+struct Person
+    firstname
+    lastname
+    Person(firstname::String, lastname::String) = new(firstname, lastname)  # This allows you to instantiate instances of Person with arguments
+    Person() = new()  # This allows you to instantiate instances of Person without arguments
+end
+
+friend = Person()
+
+friend
+```
+
+```{julia}
+#| error: true
+
+friend.firstname
+```
+
+##### To solve infinite chain of initialization using parametric type
+
+A parametric type can be regarded as a function which accepts type parameters, and then returns a new type.
+
+e.g. if `P` is a parametric type, and `T` is a type, then `P{T}` returns a new type.
+
+You can think of a parametric type as a template to make an actual type:
+
+```{julia}
+typeof(1:3)  # Equivalent to UnitRange(1, 3)
+```
+
+```{julia}
+FloatRange = UnitRange{Float64}
+```
+
+```{julia}
+FloatRange(1, 3)
+```
+
+We can use the `Union` parametric type to solve infinite chain of initialization. `Union` accetps one or more type parameters, and then return a new type which can serve as placeholders for any of the types listed as type parameters.
+
+```{julia}
+f1(x::Union{Int, String}) = x^3
+```
+
+```{julia}
+f1(3)
+```
+
+```{julia}
+f1("hello")
+```
+
+```{julia}
+#| error: true
+
+f1(1.1)
+```
+
+Now let's sovle the problem of infinite chain of initialization using parametric type:
+
+```{julia}
+struct Wagon
+    cargo::Float64
+    next::Union{Wagon, Nothing}  # next can be an object of either Wagon or Nothing
+end
+
+# Calculate the total tons of cargo in the train
+cargo(w::Wagon) = w.cargo + cargo(w.next)
+cargo(::Nothing) = 0.0
+
+train = Wagon(6, Wagon(8, Wagon(10, nothing)))
+
+cargo(train)
+```
+
+### Collections
+
+Collections are objects that store and organize other objects.
+
+#### Strings
+
+In computer memory, everything is a number, including characters.
+
+-   A character (`Char` type) is quoted by `''`.
+
+```{julia}
+Int8('A')
+```
+
+```{julia}
+Char(65)
+```
+
+You can add a number to a character, which returns a new character corresponding to the sum:
+
+```{julia}
+'A' + 3
+```
+
+-   A string is quoted by `""` or \``""""""`.
+
+Long lines in strings can be broken up by preceding the newline with a backslash (`\`):
+
+```{julia}
+"This is a long \
+line"
+```
+
+Merging elements into a string by `join()`:
+
+```{julia}
+chars = 'A':'Z'
+
+join(chars)
+```
+
+Splitting a string into characters by `collect()`:
+
+```{julia}
+collect("HELLO")
+```
+
+In fact, you can `collect()` any iterable objects into an array.
+
+##### Unicode and UTF-8
+
+Text strings in Julia are Unicode, encoded in UTF-8 format.
+
+In Unicode, each character is given a number (**code point**), encoded by several bytes (**code units**) in computer.
+
+UTF-8 is the current Unicode scheme used, which uses a variable number of bytes (1-4 bytes) per character to encode characters in computer.
+
+You can use `codepoint()` to get the code point of a character, and `ncodeunits()` to get the code units of a character.
+
+In addition, UTF-8 is backward compatible with ASCII (encoding each character with 1 byte). You can use `isascii()` to check whether a character is a ASCII character.
+
+```{julia}
+codepoint('A'), ncodeunits('A'), isascii('A')
+```
+
+As a consequence, you can type a character by typing either the character itself or its code point.
+
+```{julia}
+'A', '\U41', Char(0x00000041)
+```
+
+##### String indexing
+
+You can use subscript index to index each character in a string, but the step between indices is not always 1. It may be an integer greater than 1.
+
+You can combine the following functions to get correct indices for each character in a string:
+
+-   `firstindex()`: return the first index in a string.
+
+-   `lastindex()`: return the last index in a string.
+
+-   `nextind(s, i)`: return the next index of the element following index `i` in `s`.
+
+-   `eachindex()`: return the indices of each element.
+
+-   Using `for` loop to iterate a string.
+
+```{julia}
+s = "123一二三"
+
+i = firstindex(s)
+while i <= lastindex(s)
+    println((i, s[i]))
+    i = nextind(s, i)
+end
+```
+
+```{julia}
+for i in s
+    println(i)
+end
+```
+
+```{julia}
+for i in eachindex(s)
+    println((i, s[i]))
+end
+```
+
+##### String operations
+
+1.  Splitting strings
+
+```{julia}
+split("abc_def_ghi", "_")
+```
+
+```{julia}
+split("abcAdefBghi", isuppercase)
+```
+
+2.  Converting letters between uppercases and lowercases
+
+```{julia}
+map(uppercasefirst, split("abc_def_ghi", "_"))
+```
+
+```{julia}
+isuppercase('A')  # Check whether a single letter is in the form of uppercase
+```
+
+3.  Joining substrings
+
+```{julia}
+join(["abc", "def", "ghi"], "_")
+```
+
+4.  Reading from and writing to the clipboard
+
+```{julia}
+# Write to the clipboard
+clipboard("Hello, world!")
+
+# Read from the clipboard
+clipboard()
+```
+
+On Linux, `clipboard()` works only when you have installed the `xsel` or `xclip` commands.
+
+5.  Finding whether a substring is existed in a string by using `find*` functions
+
+```{julia}
+findall("abc", "abc_def_abc")
+```
+
+```{julia}
+findall(isuppercase, "AaBbCc")
+```
+
+6.  Converting between numbers and strings
+
+```{julia}
+parse(Float64, "3.14")  # The default base is 10
+```
+
+```{julia}
+parse(Int, "1010101", base = 2)
+```
+
+```{julia}
+string(100)  # The default base is 10
+```
+
+```{julia}
+string(100, base = 2)
+```
+
+7.  String concatenation
+
+```{julia}
+fruit = "apple"
+
+string("This is a(an) ", fruit, ", made in China.")
+```
+
+```{julia}
+"This is a(an) " * fruit * ", made in China."
+```
+
+8.  String interpolation
+
+```{julia}
+"This is a(an) $fruit, made in China."
+```
+
+```{julia}
+"This is a(an) $(fruit), made in China."
+```
+
+9.  String formatting
+
+You can use macros `@printf` and `@sprintf` to perform string formatting. These two macros are defined in the Printf module.
+
+In Julia, macros are distinguished from functions with the `@` prefix.
+
+A macro is akin to a code generator; the call site of a macro gets replaced with other code.
+
+-   `@printf` outputs the result to the console:
+
+```{julia}
+using Printf
+
+@printf("π = %0.2f", pi)  # Output pi (floating-point number) with two digits
+```
+
+-   `@sprintf` returns the result as a string.
+
+```{julia}
+@sprintf("π = %0.2f", pi)
+```
+
+For a systematic specification of the format, see [here](https://cplusplus.com/reference/cstdio/printf).
+
+##### Nonstandard string literals
+
+In Julia, you cannot express very large numbers as number literals, so you have to express them as strings that get parsed later.
+
+e.g.
+
+```{julia}
+#| error: true
+
+3.14e600
+```
+
+```{julia}
+x = parse(BigFloat, "3.14e600")
+```
+
+```{julia}
+typeof(x)
+```
+
+If you put such a expression into a loop, then it will be run at least once in each loop:
+
+```{julia}
+for i in 1:4
+    x = parse(BigFloat, "3.14e600")
+    println(x)
+end
+```
+
+This will damage the performance of your program.
+
+To avoid having to parse strings to create objects such as `BigFloat` in each loop, Julia provides special string literals such as `big"3.14e600"`.
+
+Julia will parse such a string literal only once for a `for` loop in your program, but run them many times (i.e. it won't be parsed in each loop).
+
+In other words, these objects such as `BigFloat` are created at parse time, rather than runtime.
+
+1.  DateFormat strings
+
+-   In the following code, the `DateFormat` object will be created in each loop:
+
+```{julia}
+using Dates
+
+dates = ["21/7", "8/12", "28/2"]
+
+for s in dates
+    date = Date(s, DateFormat("dd/mm"))  # Convert a date string into a date object
+    date_str = Dates.format(date, DateFormat("E-u"))  # Convert a date object into a date string with given date format
+    println(date_str)
+end
+```
+
+-   In the following code, the `DateFormat` object will be created once, but the code becomes less clear at the first glance:
+
+```{julia}
+using Dates
+
+informat = DateFormat("dd/mm")
+outformat = DateFormat("E-u")
+
+dates = ["21/7", "8/12", "28/2"]
+
+for s in dates
+    date = Date(s, informat)  # Convert a date string into a date object
+    date_str = Dates.format(date, outformat)  # Convert a date object into a date string with given date format
+    println(date_str)
+end
+```
+
+-   We can use the `dateformat` literal to solve this problem:
+
+```{julia}
+using Dates
+
+dates = ["21/7", "8/12", "28/2"]
+
+for s in dates
+    date = Date(s, dateformat"dd/mm")  # Convert a date string into a date object
+    date_str = Dates.format(date, dateformat"E-u")  # Convert a date object into a date string with given date format
+    println(date_str)
+end
+```
+
+For detaild date format specifications, see `?DateFormat`.
+
+2.  Raw strings
+
+In regular Julia strings, characters such as `$` and `\n` have special meaning.
+
+If you just want every character in a string to be literal, you need to prefix special characters with a `\` to escape them.
+
+But the more convinient way is to prefix a string with `raw` to tell Julia that this is a raw string, which means that every character in it is literal.
+
+```{julia}
+num = 100
+
+raw"What? $(num)?"  # num won't be replaced by its actual value
+```
+
+3.  Regular expressions
+
+In Julia, you can create a `Regex` object by prefixing your regular expression string with a `r`.
+
+```{julia}
+s = "E-mail address: 123456@qq.com"
+
+replace(s, r"\d+(?=@)" => "abcdef")  # Replace matched part with the pair value
+```
+
+In the following code, `match(r, s)` will search for the first match of the regular expression `r` in `s` and return a `RegexMatch` object containing the match, or `nothing` if the match failed.
+
+```{julia}
+rx = r"\d+:\d+"
+
+m = match(rx, "11:30 in the morning; 12:00 in the noon")
+
+m
+```
+
+If some parts of the regular expression are contained within parentheses, then these matched parts will be extracted out alone from the matched string, and you can retrieve these parts by indices:
+
+```{julia}
+rx = r"(\d+):(\d+)"
+
+m = match(rx, "11:30 in the morning; 12:00 in the noon")
+
+m
+```
+
+```{julia}
+m[1], m[2]
+```
+
+Further, you can give these parts names (`?<name>`) so you can retrieve them by names instead of indices:
+
+```{julia}
+rx = r"(?<hour>\d+):(?<minute>\d+)"
+
+m = match(rx, "11:30 in the morning; 12:00 in the noon")
+
+m
+```
+
+```{julia}
+m["hour"], m["minute"]
+```
+
+In addition, you can also iterate over a `RegexMatch` object, and many functions applicable to dictionaries also works with the `RegexMatch` object.
+
+4.  Number literals with `big`
+
+You can use the `big` number literal to create extremely large numbers:
+
+```{julia}
+typeof(big"100")  # BigInt
+```
+
+```{julia}
+typeof(big"1e600")  # BigFloat
+```
+
+5.  Defining your own number literals with macros
+
+```{julia}
+macro int8_str(s)  # For a string literal with the prefix foo, such as foo"100", write foo_str
+    println("hello")  # You can check how many times the "hello" will be printed when you call this macro in a loop
+    parse(Int8, s)  # Parse the number string and return an 8-bit number
+end
+```
+
+```{julia}
+total = 0
+
+# The "hello" will be printed only once,
+# which indicates that the 8-bit integer is created when the program is parsed,
+# not each time it is run
+for _ in 1:4
+    total += int8"10"
+end
+```
+
+```{julia}
+total
+```
+
+6.  MIME types
+
+MIME means Multipurpose Internet Mail Extensions, which is used as a standard to identify the file types across devices because Windows usually uses a filename extension to indicate the type of a file, while Unix-like system stores the file type in special attributes.
+
+In Julia, you can create a MIME type object in the following way:
+
+```{julia}
+MIME("text/html")  # This denotes that the type of this file is a HTML page
+```
+
+```{julia}
+typeof(ans)  # The above MIME object with the type of MIME{Symbol("text/html")}.
+```
+
+Now we know that `MIME` type is a parametric type. When you pass `"text/html"` to its constructor, the concrete type of the object is `MIME{Symbol("text/html")}`. This is long and cumbersome to write so this is why Julia offers the shortcut `MIME"text/html"`, **which is a concrete MIME type, not an object**.
+
+```{julia}
+say_hello(::MIME"text/plain") = "hello world"
+say_hello(::MIME"text/html") = "<h1>hello world</h1>"
+```
+
+```{julia}
+say_hello(MIME("text/plain"))
+```
+
+```{julia}
+say_hello(MIME("text/html"))
+```
+
+#### Arrays
+
+##### Types of arrays
+
+1.  1D array
+
+-   Column vector (type `Vector`)
+
+Elements are separated by `,` inside `[]`.
+
+Creating a column vector with default data type:
+
+```{julia}
+column_vector = [1, 2, 3]
+```
+
+Creating a column vector with given data type:
+
+```{julia}
+column_vector = Int8[1, 2, 3]
+```
+
+You can check what type each element in an array is by using the `eltype()` function. If an array contains different types of elements, it will return `Any`.
+
+-   Row vector (1 by n matrix, type `Matrix`)
+
+Elements are separated by space.
+
+```{julia}
+row_vector = [1 2 3]
+```
+
+2.  2D array (type `Matrix`)
+
+Rows are separated by `;`.
+
+```{julia}
+matrix = [1 2 3;
+          4 5 6;
+          7 8 9]
+
+# or
+matrix = [1 2 3; 4 5 6; 7 8 9]
+```
+
+Columns are separated by space:
+
+```{julia}
+matrix = [[1, 2, 3] [4, 5, 6] [7, 8, 9]]
+```
+
+3.  Array (type `Array`)
+
+The dimension of an array is greater than 2.
+
+```{julia}
+zeros(Int64, 2, 3, 4)  # two rows, three columns, and four slices
+```
+
+##### Creating arrays by specific functions
+
+`zeros()`, `ones()`, `fill()`, `rand()`.
+
+::: callout-note
+Arrays can contain any type of element.
+
+You can check the type of an object by using either `typeof()`, which **reports the types of the object itself and its elements**; or `eltype()`, which **only reports the type of its elements**.
+
+Julia will guess the type of elements in an array if it's not given explicitly when an array is created.
+
+If an array contains different types of elements, then the type of elements in this array will be `Any`, which means that you can store any type of values.
+
+When you add elements to an array by using `push!()`, it will check **whether the type of elements to be added is consistent with the type of elements in this array**, or **whether the type of elements to be added can be converted to the type of elements in this array**. If both failed, Julia will raise an error!
+:::
+
+##### Accessing array attributes
+
+1.  `size()`: the size of each dimension of an array.
+
+2.  `eltype()`: the type of elements in an array.
+
+3.  `typeof()`: the type of the object itself and its elements.
+
+4.  `ndims()`: the dimension of an array.
+
+5.  `length()`: total number of elements in an array.
+
+6.  `reshape()`: change the shape of an array.
+
+7.  `norm()`: magnitude of a vector, calculated by the following formula (this function comes from the package LinearAlgebra).
+
+$$
+ \|A\|_p = \left(\sum_{i=1}^n |a_i|^p \right)^{1/p}
+$$
+
+##### Operartions on arrays
+
+Suppose we have:
+
+```{julia}
+amounts = [4, 2, 5, 8, 1, 10]
+```
+
+```{julia}
+prices = [15.0, 2.5, 3.8, 9.0, 10.5, 8.5]
+```
+
+Note: both `amounts` and `prices` are **column vectors**.
+
+-   `sum()`
+
+```{julia}
+sum(amounts)
+```
+
+-   `push!()`: insert one or more items into a collection.
+
+-   `sort()` or `sort!()`
+
+```{julia}
+# Not modify input in place
+sort(amounts)
+```
+
+```{julia}
+amounts
+```
+
+```{julia}
+# Modify input in place
+sort!(amounts)
+```
+
+```{julia}
+amounts
+```
+
+::: callout-note
+By convention, Julia functions never modify any of their inputs in place.
+
+If it is necessary to modify inputs in place, Julia has established the convention of tacking on an exclamation mark (`!`) to the name of any function which modifies its input in place instead of returning a modified version.
+:::
+
+-   Element-wise operations: `.+, .-, .*, ./`.
+
+```{julia}
+amounts .* prices
+```
+
+-   Performing statistics by `using Statistics`.
+
+-   Performing operations of linear algebra by `using LinearAlgebra`.
+
+##### Slicing and dicing an array
+
+**Elements in a Julia array are numbered starting from 1 (i.e. 1-based indexing)!**
+
+```{julia}
+vec = [1, 2, 3, 4, 5, 6]
+```
+
+1.  Accessing elements by using `[index]`.
+
+For arrays with dimension greater than 1, you can use `[dim1, dim2, ...]`.
+
+```{julia}
+vec[3]
+```
+
+Of course, subsetting and then assignment is supported:
+
+```{julia}
+vec[3] = 100
+```
+
+2.  Using `begin` and `end` to access the first and last element.
+
+```{julia}
+vec[begin], vec[end]
+```
+
+3.  Using `:` to access all elements of some dimension.
+
+```{julia}
+vec[:]  # Access the whole vector
+```
+
+```{julia}
+A = rand(Int64, 3, 3)
+
+A[:, 1]  # Access the 1st column
+```
+
+::: callout-important
+All slice operations return **copies** of data.
+
+```{julia}
+A = collect(1:6)
+
+B = A[4:end]
+
+B[1] = 100
+
+B
+```
+
+```{julia}
+A
+```
+
+Instead, to avoid copying data during slicing an array, you can prefix the `@view` macro to the slice operations, since it will only return a *view* of subset of the array.
+
+```{julia}
+A = collect(1:6)
+
+B = @view A[4:end]
+
+B[1] = 100
+
+B
+```
+
+```{julia}
+A
+```
+:::
+
+##### Combining arrays
+
+`cat()`, `hcat()`, and `vcat()`.
+
+#### Tuples
+
+Elements are separated by `,` inside `()`.
+
+```{julia}
+t = (1, 2, 3)
+```
+
+::: callout-note
+Creating a tuple containing only one element with `(1,)` (i.e. adding a `,` after the element).
+
+Tuples are **immutable** once created.
+:::
+
+##### Named tuples
+
+```{julia}
+student = (name = "Bob", score  = 99, height = 2)
+
+# Index by Symbol or dot
+student[:name], student.name
+```
+
+```{julia}
+# Symbol <==> String
+Symbol("price"), string(:price)
+```
+
+#### Dictionaries
+
+A dictionary is made up of **a number of pairs of `key => value`**, where key and value can be any type of values.
+
+##### Creating a dictionary
+
+-   Creating a pair with the arrow operator `=>`:
+
+```{julia}
+p = 'a' => 1  # This is a pair with type Pair
+
+typeof(p)
+```
+
+```{julia}
+dump(p)  # You can use dump() to look at the fields of any value
+```
+
+```{julia}
+# From the output of dump(), we can easily see how to get values of a pair
+# This will generate a tuple by putting several values in one line by separating them with a comma
+# the functions first() and last() are versatile for ordered collections
+p.first, p.second, first(p), last(p), p[1], p[2]
+```
+
+-   You can provide a list of pairs to create a dictionary:
+
+```{julia}
+d = Dict('a' => 1, 'b' => 2, 'c' => 3)
+
+typeof(d)
+```
+
+```{julia}
+dump(d)  # Checking the fields of a dictionary
+```
+
+-   Passing an array of pairs to the dictionary constructor:
+
+```{julia}
+a = ['a' => 1, 'b' => 2, 'c' => 3]
+
+Dict(a)
+```
+
+-   Passing an array of tuples containing only **two** elements to `Dict()`:
+
+```{julia}
+a = [('a' => 1), ('b' => 2), ('c' => 3)]
+
+Dict(a)
+```
+
+-   Creating an empty dictionary:
+
+```{julia}
+Dict()
+```
+
+-   Creating an empty dictionary with given types of keys and values:
+
+```{julia}
+d = Dict{String, Int64}()
+```
+
+In the above case, you must provide the keys and values with matched types as set above:
+
+```{julia}
+d["a"] = 1
+```
+
+```{julia}
+#| error: true
+d['b'] = 2  # This will raise an error, because the type of 'b' is Char, not String
+```
+
+-   Creating a dictionary from two separate arrays zipped by `zip()` function:
+
+```{julia}
+Dict(zip('a':'c', 1:3))
+```
+
+::: callout-note
+`zip()` function can zip the corresponding values in a list of arrays into paired tuples, until any of them is exhausted.
+
+```{julia}
+collect(zip('a':'c', 1:3, 'A':'C'))
+```
+:::
+
+##### Accessing elements
+
+```{julia}
+d = Dict(i => j for (i, j) in zip('A':'F', 'a':'f'))
+```
+
+-   By key:
+
+```{julia}
+d['F']
+```
+
+-By `get(dict, key, default)`: if the `key` is not in the `dict`, it will return the `default`, instead of raising an error.
+
+```{julia}
+get(d, 'Z', -1)  #
+```
+
+::: callout-note
+You can use `keys()` and `values()` to get all keys and values, respectively.
+
+You can check whether a dictionary contains a key by using `haskey(dict, key)`.
+:::
+
+#### Sets
+
+1.  Creating sets
+
+```{julia}
+fruits = Set(["apple", "banana", "peach", "pear", "orange"])
+```
+
+2.  Properties of sets
+
+The set in Julia is the very set in mathematics.
+
+For a given set S, the following hold:
+
+-   Each element x is either in S or not in S.
+
+-   Elements are unordered in S.
+
+-   There are no duplicate elements in S.
+
+3.  Set-specific operations
+
+-   Union: `∪` or `union()`.
+
+-   Intersection: `∩` or `intersect()`.
+
+-   Difference: `setdiff()`.
+
+Certainly, you can check whether an element belongs to a set or not (see @nte-memberoperator), as well as whether a set is a (proper) subset of the other (see @nte-subsetoperator).
+
+::: {#nte-subsetoperator .callout-note title="Subset operator `⊆`"}
+You can use `issubset()`, `⊆`, `⊇`, or `⊈` to judge the relationship between any two sets.
+:::
+
+#### Collection comprehension
+
+An example in terms of an array: `[expression_for_member for member in iterable if condition]`, where `if condition` is optional.
+
+```{julia}
+[i for i in 1:10 if i%2 == 0]
+```
+
+```{julia}
+[(i, j, k) for (i, j, k) in zip('A':'F', 1:6, 'a':'f')]  # For (i, j, k), () is mandatory
+```
+
+```{julia}
+Dict('A'+i => i+1 for i in 0:10)
+```
+
+A nested example:
+
+```{julia}
+[[j for j in 1:6] for i in 1:3]
+```
+
+**Generating a matrix:**
+
+```{julia}
+[100i + j for i=1:3, j=1:3]
+```
+
+The above code is equivalent to:
+
+```{julia}
+A = zeros(Float64, 3, 3)
+
+for i in 1:3
+    for j in 1:3
+        A[i,j] = 100i + j
+    end
+end
+
+A
+```
+
+#### Enumerating values and indices
+
+```{julia}
+collect(enumerate('A':'F'))
+```
+
+```{julia}
+[(i, val) for (i, val) in enumerate('A':'F')]
+```
+
+#### Creating an `enum` type with `@enum` macro
+
+```{julia}
+@enum Fruit apple peach pear banana orange
+
+Fruit
+```
+
+```{julia}
+Fruit(0), Fruit(3)  # Access by index
+```
+
+```{julia}
+instances(Fruit)  # Return all possible values
+```
+
+#### Understanding Julia collections
+
+Two key questions:
+
+1.  What makes something a collection?
+
+2.  What are the differences and similarities between different collection types?
+
+##### What makes something a collection
+
+At a minimum, you are expected to extend the `iterate()` function for your data type with the following methods to make your data type a collection:
+
+| Method                 | Purpose                                                                    |
+|------------------------------------|------------------------------------|
+| `iterate(iter)`        | Return the first item and the next state (e.g. the index of the next item) |
+| `iterate(iter, state)` | Return the current item and the next state                                 |
+
+An index-based iteration example:
+
+1.  Define the `Cluster` type to be iterated:
+
+```{julia}
+# Define the Engine type
+abstract type Engine end
+
+# Define valid engine models
+struct Panda <: Engine
+    count::Integer
+end
+struct Bear <: Engine
+    count::Integer
+end
+struct Dog <: Engine
+    count::Integer
+end
+
+# Define the Cluster type, which can consist of many engine models
+struct Cluster <: Engine
+    engines::Vector{Engine}  # A vector with elements of Engine type
+end
+```
+
+```{julia}
+engine_type(::Panda) = "Panda"
+engine_type(::Bear) = "Bear"
+engine_type(::Dog) = "Dog"
+
+engine_count(engine::Union{Panda, Bear, Dog}) = engine.count
+```
+
+2.  Extend the `iterate()` function:
+
+```{julia}
+import Base: iterate
+
+# Start the iteration
+function iterate(cluster::Cluster)
+    cluster.engines[1], 2  # Return the first element and the index of the next element
+end
+
+# Get the next element
+function iterate(cluster::Cluster, i::Integer)
+    if i > length(cluster.engines)
+        nothing  # Return nothing to indicate you reached the end
+    else
+        cluster.engines[i], i+1  # Don't forget to return the index of the next element
+    end
+end
+```
+
+3.  Iterate the `Cluster` instance:
+
+```{julia}
+cluster = Cluster([Panda(1), Bear(5), Dog(10)])
+```
+
+```{julia}
+for engine in cluster
+    println(engine_type(engine), ": ", engine_count(engine))
+end
+```
+
+Internally, the Julia JIT compiler will convert this `for` loop into a lower-level `while` loop, which looks like the following code:
+
+```{julia}
+next = iterate(cluster)  # Begin iteration
+while next != nothing  # Check if you reached the end of the iteration
+    (engine, i) = next
+    println(engine_type(engine), ": ", engine_count(engine))
+    next = iterate(cluster, i)  # Advance to the next element
+end
+```
+
+A linked list example:
+
+```{julia}
+import Base: iterate
+
+struct MyLinkedList
+    id::Int
+    name::String
+    next::Union{MyLinkedList, Nothing}
+end
+
+# First, Julia uses the instance of MyLinkedList as the unique argument to retrieve the first element and the flag of the next element
+iterate(first::MyLinkedList) = ((first.id, first.name), first.next)  # The first value is what you want to retrieve; the second value is used to tell where the next element is
+# Then, Julia uses the instance of MyLinkedList and the flag of the next element, returned by the previous one to retrieve the next element and the flag of the next element, in contrast with the current one
+iterate(prev::MyLinkedList, current::MyLinkedList) = ((current.id, current.name), current.next)
+# Finally, iteration-supported function needs a nothing to indicate that the iteration is done
+iterate(::MyLinkedList, ::Nothing) = nothing  # Return nothing if the iteration is done
+
+x = MyLinkedList(1, "1st", MyLinkedList(2, "2nd", MyLinkedList(3, "3rd", nothing)))
+
+for (id, name) in x  # The parentheses are essential
+    println(id, ": ", name)
+end
+```
+
+::: callout-caution
+For multiple assignment, parentheses are mandatory in `for` loop; otherwise it's trivial.
+:::
+
+A similar `while` counterpart of `for`:
+
+```{julia}
+next = iterate(x)
+while next != nothing
+    current, next = next
+    println(current[1], ": ", current[2])
+    next = iterate(x, next)
+end
+```
+
+4.  Adding support for `map()` and `collect()`
+
+If you run `collect()` on x, you will get the following error:
+
+```{julia}
+#| error: true
+
+collect(x)
+```
+
+Of course, you can simply define a `length()` method for `MyLinkedList` type like the following:
+
+```{julia}
+import Base: length
+
+length(::Nothing) = 0
+length(x::MyLinkedList) = 1 + length(x.next)
+
+length(x)
+```
+
+However, the time it takes to calculate the length of `MyLinkedList` is proportional to its length. Such algorithms are referred to as **linear** or $O(n)$ in big-O notation.
+
+Instead, we will implement an `IteratorSize()` method:
+
+```{julia}
+import Base: IteratorSize
+
+IteratorSize(::Type{MyLinkedList}) = Base.SizeUnknown()
+```
+
+By default, `IteratorSize()` is defined like the following:
+
+```{julia}
+#| eval: false
+
+IteratorSize(x) = IteratorSize(typeof(x))
+IteratorSize(::Type) = HasLength()
+```
+
+::: callout-note
+Here, `IteratorSize()` is a **trait** of Julia collections. It is used to indicate whether a collection has a known length.
+
+**In Julia, traits are defined as abstract types. The values a trait can have are determined by a concrete subtype.**
+
+For example, the trait `IteratorSize()` has subtypes `SizeUnknown()`, `HasLength()`, and so on.
+
+If the `IteratorSize()` trait is defined as `HasLength()`, then Julia will call `length()` to determine the size of the result array produced from `collect()`. Instead, when you define this trait as `SizeUnknown()`, Julia will use an empty array for output that grows as needed.
+:::
+
+::: callout-note
+```{julia}
+foo(::Type{Integer}) = 'A'  # Only accepting the type Integer as a valid argument
+
+foo(Integer)
+```
+
+```{julia}
+#| error: true
+
+foo(Int64)
+```
+
+```{julia}
+fb(::Type{<:Integer}) = 'B'  # Integer as well as its all subtypes are valid arguments
+
+fb(Integer)
+```
+
+```{julia}
+fb(Int64)
+```
+:::
+
+5.  Adding more interfaces to your data type
+
+To make your data type more versatile, you may add more interfaces to your data type.
+
+For example, as a collection, your data type should support getting, setting, adding, and removing elements, which are achieved by the following methods:
+
+-   `getindex()`: this makes it possible to access elements with `[]`.
+
+-   `setindex!()`: this makes it possible to set elements with `[]`.
+
+-   `push!()`: adding elements to the back of a collection.
+
+-   `pushfirst!()`: adding elements to the front of a collection.
+
+-   `pop!()`: removing the last element.
+
+-   `popfirst!()`: removing the first element.
+
+In a word, some interfaces to a collection are achieved by implicitly calling some methods by Julia itself (e.g. looping a collection); some other interfaces to a collection are achieved by explicitly calling some methods by users (e.g. adding elements).
+
+### Functional programming
+
+1.  `map()`, `reduce()`, and `filter()`
+
+::: callout-note
+#### Higher order function
+
+These are funtions that take other functions as arguments and/or return functions.
+:::
+
+-   `map(f, iterable)`: apply `f` to each element of `iterable`.
+
+```{julia}
+map(uppercase, 'a':'z')
+```
+
+-   `reduce(f, iterable)`: apply `f` to the element of `iterable` in an iterable way.
+
+```{julia}
+reduce(+, 1:100)
+```
+
+-   `filter(predicate, iterable)`: return a subset of `iterable` based on `predicate`.
+
+Note: a `predicate` is a function that takes some value and always returns a Boolean value.
+
+```{julia}
+filter(isuppercase, ['A', 'b', 'C', 'd'])
+```
+
+### I/O
+
+#### Text I/O
+
+##### Print text
+
+1.  `print()`: print text without a newline character.
+
+```{julia}
+print("hello"); print("world")
+```
+
+2.  `println()`: print text with a newline character added to the end.
+
+```{julia}
+println("hello"); println("world")
+```
+
+3.  `printstyled()`: print text with rich styles.
+
+```{julia}
+printstyled("hello world", color = :magenta)
+```
+
+::: callout-note
+All colors are given as `Symbol` objects which is quite similar to a string starting with `:` (e.g. `:hello`).
+
+`Symbol` is the type of object used to represent identifiers in parsed julia code.
+
+```{julia}
+sym = Symbol("hello")
+```
+
+```{julia}
+sym == :hello
+```
+
+```{julia}
+x = 100
+
+eval("x")
+```
+
+```{julia}
+eval(Symbol("x"))
+```
+:::
+
+##### Align text
+
+-   `lpad()`: left-side padding with given string.
+
+-   `rpad()`: right-side padding with given string.
+
+##### Reading and writing text
+
+We have a file named `test.csv` with the following content:
+
+```{julia}
+#| eval: false
+
+#=
+name,size,price
+t-shirt,L,100
+sport shoe,M,1000
+coat,L,500
+=#
+```
+
+```{julia}
+# open() --> readline() --> split() --> parse() --> eof() --> close()
+io = open("test.csv", "r")  # Open a file connection with open(file, mode)
+
+list = Any[]
+push!(list, split(readline(io), ","))  # Read a line once using readline()
+
+while !eof(io)  # Check whether you are in the end of a file with eof()
+    ele = split(readline(io), ",")  # Split a string based on another string using split()
+    push!(list, [ele[1], ele[2], parse(Int64, ele[3])])  # Use parse() to convert a string to anything else
+end
+close(io)  # Close the file connection with close()
+
+list
+```
+
+You can write text into a file using `print()`, `println()`, or `printstyled()`, the 1st parameter of which is an `IO` object.
+
+You can also read or write text from `stdin` or to `stdout`.
+
+## Julia documentation system
+
+```{julia}
+"Store propellant for a rocket"
+abstract type OhTank end
+
+"""
+    total(t::OhTank) -> Float64
+
+Mass of propellant tank `t` when it is full.
+"""
+function totalmass end
+```
+
+The Julia documentation system works by prefixing a function or type definition with a regular Julia text string, quoted by double or triple quotes. This is totally different from a comment with the `#` symbol. Comments don't get stored in the Julia help system.
+
+Inside this text string, you can document your function or type definition using markdown syntax.
+
+## Modules and Pakcages
+
+The core Julia language imposes very little; many functions are extended by modules and packages.
+
+Julia code is organized into files, modules, and packages. Files containing Julia code use the `.jl` file extension.
+
+### Modules
+
+Modules help organize code into coherent units. They are delimited syntactically inside `module <NameOfModule> ... end`, and have the following features:
+
+1.  Modules are separate namespaces, each introducing a new global scope. This allows the same name to be used for different functions or global variables without conflict, as long as they are in separate modules.
+
+2.  Modules have facilities for detailed namespace management: each defines a set of names it exports, and can import names from other modules with `using` and `import`.
+
+3.  Modules can be precompiled for faster loading, and may contain code for runtime initialization.
+
+Module definition:
+
+```{julia}
+#| eval: false
+
+module <NameOfModule>
+
+# using, import, export statements are usually here
+
+include("file1.jl")
+include("file2.jl")
+
+end
+```
+
+::: callout-note
+1.  Files and file names are mostly unrelated to modules, since modules are associated only with module expression. One can have multiple files per module, and multiple modules per file.
+
+2.  `include` behaves as if the contents of the source file were evaluated in the global scope of the including module.
+
+3.  The recommended style is not to indent the body of the module. It is also common to use `UpperCamelCase` for module names, and use the plural form if applicable.
+:::
+
+#### Namespace management
+
+Namespace management refers to the facilities the language offers for making names in a module available in other modules.
+
+##### Qualified names
+
+Names for functions, variables, and types in the global scope always belong to a module, called the parent module. One can use `parentmodule()` to find the parent module of a name.
+
+One can also refer to those names outside their parent module by prefixing them with their module name, e.g. `Base.UnitRange`. This is called a qualified name.
+
+The parent module may be accessible using a chain of submodules like `Base.Math.sin`, where `Base.Main` is called the module path.
+
+Due to syntactic ambiguities, qualifying a name that contains only symbols, such as an operator, requires inserting a colon, e.g. `Base.:+`. A small number of operators additonally require parentheses, e.g. `Base.:(==)`.
+
+##### Export lists
+
+Names can be added to the export list of a module with `export`: these are symbols that are imported when `using` the module.
+
+```{julia}
+#| eval: false
+
+module NiceStuff
+
+export nice, DOG
+
+# definitions of nice and DOG
+
+end
+```
+
+In fact, a module can have multiple `export` statements in arbitrary locations.
+
+##### `using` and `import`
+
+1.  `using`: brings **the module name** and **the elements of the export list** into the surrounding global namespace.
+
+2.  `import`: brings only **the module name** into scope.
+
+::: callout-note
+1.  To load a module from a locally defined module, a dot needs to be added before the module name like `using .ModuleName`.
+
+2.  One can specify which identifiers to be loaded in a module, e.g., `using .NiceStuff: nice, DOG`.
+
+3.  Renaming imported identifiers with `as`.
+
+```{julia}
+#| eval: false
+
+import CSV as C  # This only works with import
+import CSV: read as rd
+using CSV: read as rd
+```
+:::
+
+#### How does Julia find a module
+
+1.  Julia looks for module files in directories defined in the `LOAD_PATH` variable:
+
+```{julia}
+LOAD_PATH
+```
+
+2.  To make it look in other places, add some more using `push!()`:
+
+```{julia}
+push!(LOAD_PATH, "/path/to/my/julia/projects")
+```
+
+::: callout-note
+To avoid doing this every time you run Julia, put this line into your startup file `~/.julia/config/startup.jl`, which runs each time you start an interactive Julia session.
+:::
+
+3.  Julia looks for files in those directories in the form of a package with the structure: `ModuleName/src/file.jl`.
+
+4.  Or, if not in package form, it will look for a filename that mathes the name of your module.
+
+### Standard modules
+
+There are three most important modules:
+
+-   Core
+
+Core contains all identifiers considered "built in" to the language, i.e. part of the core language and not libraries.
+
+Eevery module implicitly specifies `using Core`, since you cannot do anything without these definitions.
+
+-   Base
+
+Base contains basic functionality.
+
+All modules implicitly contain `using Base`.
+
+-   Main
+
+Main is the top-level module, and Julia starts with Main set as the current module.
+
+Variables defined at the prompt go in Main, and `varinfo()` lists variables in Main.
+
+### Packages
+
+Julia uses git for organizing and controling packages.
+
+By convention, all packages are stored in git repositories, with a ".jl" suffix.
+
+## Environments
+
+## Appendices
+
+### Julia installation and configuration
+
+1.  Setting some environmental variables globally and permanently
+
+Creating a `~/.julia/config/startup.jl` file with the contents:
+
+```{julia}
+#| eval: false
+
+# Customizing package server
+ENV["JULIA_PKG_SERVER"] = "https://mirrors.pku.edu.cn/julia"
+
+# Customizing https proxy
+ENV["https_proxy"] = "http://127.0.0.1:10809"
+```
+
+### Julia REPL mode
+
+-   `julia>`: the standard Julia mode.
+
+-   `help?>`: the help mode. Enter help mode by pressing `?`.
+
+-   `pkg>`: the package mode for installing and removing packages. Enter package mode by pressing `]`.
+
+-   `shell>`: the shell mode. Enter shell mode by pressing `;`.
+
+To back to the standard Julia mode, press Backspace.
+
+### Installing third-party packages
+
+Pkg is Julia's builtin package manager, which can be used to install, update, and remove packages.
+
+You can install packages either by calling Pkg functions in the standard Julia mode or by executing Pkg commands in the package mode.
+
+-   In the package mode:
+
+```{julia}
+#| eval: false
+
+# To install packages (multiple packages are separated by comma), use add
+(@v1.9) pkg> add JSON, StaticArrays
+
+# To remove packages, use rm or remove (some Pkg REPL commands have a short and a long version of the command)
+(@v1.9) pkg> rm JSON, StaticArrays
+
+# To update packages, use up or update
+(@v1.9) pkg> up
+
+# To see installed packages, use st or status
+(@v1.9) pkg> st
+```
+
+::: callout-note
+In the REPL prompt, `(@v1.9)` lets you know that `v1.9` is the active environment.
+
+Different environments can have totally different packages and versions installed from another environment.
+
+This makes it possible that you can constuct an environment tailored to your project, which makes your project completely reproducible.
+:::
+
+-   In the standard Julia mode
+
+```{julia}
+#| eval: false
+
+julia> Pkg.add(["JSON", "StaticArrays"])
+
+# Pkg.remove()
+# Pkg.update()
+# Pkg.status()
+```
