@@ -501,12 +501,14 @@ end
 
 #### Closure
 
-A function (inner function) **with references which are used locally, but defined in an enclosing scope (e.g. outer function)** is **defined inside another function (outer function)** and **returned by that function**. Then, when calling the outer function, the inner function will be returned with an environment, recording some state of outer function.
+A *closure* is a function that has captured some external state not supplied as an argument since the inner scope can use variables defined in an outter scope.
+
+Anonymous functions are frequently used as closures.
 
 ```{julia}
 function make_pow(n::Real)  # Outer function
     function (x::Real)  # Inner function
-        x^n  # The inner function uses n defined outside it
+        x^n  # The inner function uses n defined outside it and n is not passed as an argument to it
     end
 end
 
@@ -514,6 +516,32 @@ pow2 = make_pow(2)  # The returned function with n=2 is assigned to variable pow
 pow3 = make_pow(3)
 
 pow2(2), pow3(2)
+```
+
+#### Partial function application
+
+Partial function application refers to the process of fixing a number of arguments to a function, producing another function accepting fewer arguments.
+
+Obviously, closure is a way to achieve the partial function application.
+
+#### Function composition and piping
+
+##### Function composition
+
+The concept of function composition in Julia is the very concept of function composition in mathematics and the operation symbol is the same one: `∘`, typed using `\circ<tab>` (e.g. `(f ∘ g)(args...) is the same as`f(g(args...))\`).
+
+```{julia}
+(sqrt ∘ +)(3, 6)  # Equivalent to sqrt(+(3, 6))
+```
+
+##### Dot syntax for vectorizing functions
+
+##### Function piping
+
+The pipe symbol is `|>`, which is used to chain together functions taking **single** arguments as inputs.
+
+```{julia}
+1:10 |> sum |> sqrt
 ```
 
 ### Exception
@@ -2317,29 +2345,25 @@ In a word, some interfaces to a collection are achieved by implicitly calling so
 
 ### Functional programming
 
-1.  `map()`, `reduce()`, and `filter()`
-
-::: callout-note
-#### Higher order function
+#### Higher order functions
 
 These are funtions that take other functions as arguments and/or return functions.
-:::
 
--   `map(f, iterable)`: apply `f` to each element of `iterable`.
+1.  `map(f, iterable)`: apply `f` to each element of `iterable`.
 
 ```{julia}
 map(uppercase, 'a':'z')
 ```
 
--   `reduce(f, iterable)`: apply `f` to the element of `iterable` in an iterable way.
+2.  `reduce(f, iterable)`: apply `f` to the element of `iterable` in an iterable way.
 
 ```{julia}
 reduce(+, 1:100)
 ```
 
--   `filter(predicate, iterable)`: return a subset of `iterable` based on `predicate`.
+3.  `filter(predicate, iterable)`: return a subset of `iterable` based on `predicate`.
 
-Note: a `predicate` is a function that takes some value and always returns a Boolean value.
+Note: a `predicate` is a function that takes an element of `iterable` and always returns a Boolean value.
 
 ```{julia}
 filter(isuppercase, ['A', 'b', 'C', 'd'])
