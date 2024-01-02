@@ -6,6 +6,9 @@ format:
   html:
     toc: true
     toc-depth: 6
+    toc-location: left
+    number-sections: true
+    number-depth: 6
 jupyter: julia-1.9
 ---
 
@@ -1271,7 +1274,7 @@ f1("hello")
 f1(1.1)
 ```
 
-Now let's sovle the problem of infinite chain of initialization using parametric type:
+Now let's solve the problem of infinite chain of initialization using parametric type:
 
 ```{julia}
 struct Wagon
@@ -2456,7 +2459,7 @@ filter(isuppercase, ['A', 'b', 'C', 'd'])
 
 ### I/O
 
-### Julia's I/O system
+#### Julia's I/O system
 
 The Julia's I/O system is centered on the abstract type `IO`, which has concrete types, such as `IOStream`, `IOBuffer`, `Process` and `TCPSocket`. Each type allows you to read and write data from different I/O devices, such as files, text buffers, running processes, or network connections.
 
@@ -2487,7 +2490,7 @@ printstyled("hello world", color = :magenta)
 ::: callout-note
 All colors are given as `Symbol` objects which is quite similar to a string starting with `:` (e.g. `:hello`).
 
-`Symbol` is the type of object used to represent identifiers in parsed julia code.
+`Symbol` is the type of object used to represent identifiers in parsed Julia code.
 
 ```{julia}
 sym = Symbol("hello")
@@ -2552,6 +2555,61 @@ list
 You can write text into a file using `print()`, `println()`, or `printstyled()`, the 1st parameter of which is an `IO` object.
 
 You can also read or write text from `stdin` or to `stdout`.
+
+### Parametric types
+
+You can think of the expression `S=P{T}` as **parametric type `P`** taking a **type parameter `T`** and returning a new **concrete type `S`**. Both `T` and `S` are concrete types, while `P` is just a template for making types.
+
+#### Defining parametric methods
+
+```{julia}
+function linearsearch(haystack::AbstractVector{T}, needle::T) where T
+    for (i, x) in enumerate(haystack)
+        if needle == x
+            return i
+        end
+    end
+end
+
+linearsearch([1, 4, 6, 8], 6)
+```
+
+```{julia}
+#| error: true
+
+linearsearch([1, 4, 6, 8], "six")
+```
+
+In this example, the `linearsearch()` is a parametric method, which takes a type parameter `T`, defined in the `where T` clause. You can define more than one type parameter in the `where` clause (e.g. `where {T, S}`).
+
+#### Defining parametric types
+
+```{julia}
+"A point at coordinate (x, y)"
+struct Point{T}
+    x::T
+    y::T
+end
+```
+
+You can impose constraints on the type parameter `T` with subtype operator `<:`:
+
+```{julia}
+struct RPoint{T<:Number}
+    x::T
+    y::T
+end
+```
+
+When creating a point with `Point`, you can let Julia to infer the type parameter from arguments or explicitly set the type parameter:
+
+```{julia}
+Point(1, 2), Point{Int}(3, 4)
+```
+
+In fact, `sum(xs::Vector)` is the same as `sum(xs::Vector{T}) where T`.
+
+In summary, parametric types can improve the **type safety** (stricter type checking), **performance** (more type restrictions, less type-related jobs), and **memory usage** (more type restrictions, more precise assignment of memory).
 
 ## Julia documentation system
 
