@@ -6,6 +6,9 @@ format:
   html:
     toc: true
     toc-depth: 6
+    toc-location: left
+    number-depth: 6
+    number-sections: true
 ---
 
 ## Bash
