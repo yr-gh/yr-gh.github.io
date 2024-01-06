@@ -1,0 +1,21 @@
+---
+title: "Probability and Statistics"
+author: "Rui Yang"
+date: "01/05/2024"
+format:
+  html:
+    toc: true
+    toc-depth: 6
+    toc-location: left
+    number-sections: true
+    number-depth: 6
+jupyter: julia-1.9
+---
+
+## Pseudorandom number generation
+
+## Monte Carlo simulation
+
+## Appendices
+
+### Base conversions

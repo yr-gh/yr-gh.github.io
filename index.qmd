@@ -114,3 +114,7 @@ A unifying parallelization framework at <https://www.futureverse.org/>.
 1. **Julia language guide** by Dongfeng Li at <https://www.math.pku.edu.cn/teachers/lidf/docs/Julia/html/_book/index.html>.
 
 2. **Julia data science** at <https://juliadatascience.io>.
+
+### Packages for data science
+
+* `DataFrames`: an infrastructure for tabular data manipulation (guide at <https://dataframes.juliadata.org/stable>).

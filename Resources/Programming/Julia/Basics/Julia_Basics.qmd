@@ -220,7 +220,7 @@ z = (x = 1;
 z
 ```
 
-1.  `begin` block
+2.  `begin` block
 
 Put all subexpressions separated by a newline character between `begin` and `end` keywords.
 
@@ -239,7 +239,7 @@ z = begin x = 1; y = 2; x + y end
 z
 ```
 
-This is quite useful with the inline function definition.
+This is quite useful for the inline function definition.
 
 ::: callout-note
 For multiple statements, you can put them in one line and separate them with `;`, which is not the same thing as compound expressions:
@@ -485,6 +485,43 @@ function (<parameters>)
 end
 ```
 
+##### `do` blocks
+
+We can use `do` blocks to create mutiline anonymous functions.
+
+The following two statements are equivalent:
+
+```{julia}
+map(x -> begin
+              if x < 0 && iseven(x)
+                  return 0
+              elseif x == 0
+                  return 1
+              else
+                  return x
+              end
+         end,
+    [-2, 0, 2])
+```
+
+```{julia}
+map([-2, 0, 2]) do x
+    if x < 0 && iseven(x)
+        return 0
+    elseif x == 0
+        return 1
+    else
+        return x
+    end
+end
+```
+
+In the above example, the `do x` syntax creates an anonymous function with argument `x` and passes it as the first argument to `map()`.
+
+Similarly, `do x, y` will create a two-argument anonymous function but `do (x, y)` will create a one-argument anonymous function, whose argument is a tuple.
+
+**In a word, we can use `do` blocks to create anonymous functions which are passed as the first argument to some higher-order functions, the first argument of which must be the `Function` type.**
+
 #### The splat operator `...`
 
 The splat operator can be used to turn arrays or tuples into function arguments.
@@ -520,6 +557,26 @@ pow3 = make_pow(3)
 
 pow2(2), pow3(2)
 ```
+
+::: {.callout-tip title="Performance of captured variable"}
+For the consideration of performance, if the type of a captured variable is already known, you would better **add a type annotation to it**. In addition, if the value of this captured variable need not be changed after the closure is created, **you can indicate it with a `let` block**:
+
+```{julia}
+function abmult(r::Int)
+    r1::Int = r  # Type annotation
+    if r1 < 0
+        r1 = -r1
+    end
+    f = let r1 = r1  # Fix it
+            x -> x * r1
+        end
+    return f
+end
+
+f = abmult(10)
+f(10)
+```
+:::
 
 #### Partial function application
 
@@ -2138,7 +2195,7 @@ You can use `issubset()`, `⊆`, `⊇`, or `⊈` to judge the relationship betwe
 
 #### Collection comprehension
 
-An example in terms of an array: `[expression_for_member for member in iterable if condition]`, where `if condition` is optional.
+An example in terms of an array: `[F(x, y, ...) for x = rx, y = ry, ...]`, where the latter `for` is nested within the former one, and generated values can be filtered using the `if` keyword.
 
 ```{julia}
 [i for i in 1:10 if i%2 == 0]
@@ -2152,10 +2209,22 @@ An example in terms of an array: `[expression_for_member for member in iterable 
 Dict('A'+i => i+1 for i in 0:10)
 ```
 
-A nested example:
-
 ```{julia}
 [[j for j in 1:6] for i in 1:3]
+```
+
+#### Generator
+
+Collection comprehensions can also be written **without the enclosing brackets**, producing an object known as a generator.
+
+```{julia}
+sum(1/n^2 for n = 1:1000)
+```
+
+**Note:** when writing a generator expression **with multiple dimensions inside an argument list**, parentheses are needed to separate the generator from subsequent arguments.
+
+```{julia}
+map(tuple, (1/(i+j) for i=1:2, j=1:2), [1 3; 2 4])
 ```
 
 **Generating a matrix:**
@@ -2610,6 +2679,231 @@ Point(1, 2), Point{Int}(3, 4)
 In fact, `sum(xs::Vector)` is the same as `sum(xs::Vector{T}) where T`.
 
 In summary, parametric types can improve the **type safety** (stricter type checking), **performance** (more type restrictions, less type-related jobs), and **memory usage** (more type restrictions, more precise assignment of memory).
+
+### Scope of variables
+
+#### Introduction
+
+The scope of a variable is the region of code within which a variable is accessible. Variable scoping helps avoid variable naming conflicts.
+
+There are two main types of scopes in programming languages: **lexical scope** (also called static scope) and **dynamic scope**.
+
+In languages with **lexical scope**, the name resolution depends on the location in the source code and the lexical context, where the named variable is defined. In contrast, in languages with **dynamic scope**, the name resolution depends on the program state and the runtime context when the name is encountered.
+
+In a word, with **lexical scope** a name is resolved by searching the local lexical context, then if that fails, by searching the outer lexical context, and so on; with **dynamic scope**, a name is resolved by searching the local execution context, then if that fails, by searching the outer execution context, and so on, progressing up the call stack.
+
+Julia uses lexical scope. Further, there are two main types of scopes in Julia, **global scope** and **local scope**. The latter can be nested.
+
+In Julia, different constructs may introduce different types of scopes.
+
+#### Scope constructs
+
+The constructs introducing scopes are:
+
+| Construct                                                    | Scope type | Allowed within |
+|------------------------|------------------------|------------------------|
+| module, baremodule                                           | global     | global         |
+| struct                                                       | soft local | global         |
+| for, while, try                                              | soft local | global, local  |
+| macro                                                        | hard local | global         |
+| functions, do blocks, let blocks, comprehensions, generators | hard local | global, local  |
+
+**Note:** **begin blocks** and **if blocks** do not introduce scopes.
+
+#### Global scope
+
+Each module introduces a global scope.
+
+Modules can introduce variables of other modules into their scopes through the `using` or `import` statement, or through qualified access using the dot notation.
+
+```{julia}
+#| eval: false
+
+module A
+    a = 1  # a is a global variable in A's scope
+end
+
+module B
+    module C
+        c = 2
+    end
+    b = C.c  # can access the namespace of a nested global scope through a qualified access
+
+    import ..A  # makes module A available
+    d = A.a
+end
+```
+
+If a top-level expression (e.g. a `begin` or `if` block) contains a variable declared with keyword `local`, then that variable is not accessible outside that expression.
+
+```{julia}
+x = 1
+begin
+    local x = 0
+    @show x
+end
+@show x
+```
+
+**Note:** the REPL is in the global scope of the module `Main`.
+
+#### Local scope
+
+A local scope nested inside another local/global scope can see variables in all the outer scopes in which it is contained. Outer scopes, on the other hand, cannot see variables in inner scopes.
+
+When `x = <value>` occurs in a local scope, Julia will apply the following rules to decide what the expression means:
+
+1.  **Existing local**: if `x` is already a local variable, then the existing local `x` is assigned.
+
+2.  **Hard scope**: if x is not already a local variable and this assignment occurs inside of any hard scope construct, then a new local variable named `x` is created in the scope of the assignment.
+
+3.  **Soft scope**: if x is not already a local variable and all of the scope constructs containing the assignment are soft scopes, the behavior depends on whether the global variable `x` is defined:
+
+    -   If global `x` is undefined, a new local variable named `x` is created in the scope of the assignment;
+
+    -   If global `x` is defined, then the following rules are applied:
+
+        -   In interactive mode, the global variable `x` is assigned;
+
+        -   In non-interactive mode, an ambiguity warning is printed and a new local variable named `x` is created in the scope of the assignment.
+
+Therefore, in non-interactive mode, the soft scope and hard scope behaves identically except that a warning is printed when an implicitly local variable shadows a global variable in the soft scope.
+
+**Note:** in Julia, a variable cannot be a non-local variable, meaning that it is either a local variable or a global variable, **which is determined regardless of the order of expressions**. As a consequence, if you assign to an existing local, it always updates that existing local; therefore, you can only shadow a local by explicitly declaring a new local in a nested scope with the `local` keyword.
+
+```{julia}
+function outer_foo()
+    x = 99  # x is a local variable in the outer_foo's scope
+    @show x
+    let
+        x = 100  # updates the local variable x defined in the outer_foo's scope
+    end
+    @show x
+    return nothing
+end
+```
+
+```{julia}
+#| error: true
+
+code = """
+s = 0 # global
+for i = 1:10
+    t = s + i # new local t
+    s = t # new local s with warning
+end
+s, # global; should be 0
+@isdefined(t) # global; should be false
+""";
+
+include_string(Main, code)
+```
+
+::: callout-caution
+So don't forget to use the `global` keyword to declare a variable `x` if you want to use a global `x` instead of a local `x` in seeing a `for` loop in non-interactive mode:
+
+```{julia}
+code = """
+s = 0
+for i in 1:100
+    global s = s + i
+end
+@show s
+"""
+
+include_string(Main, code)
+```
+:::
+
+#### `let` blocks
+
+`let` blocks create a new hard local scope and **introduce new variable bindings each time they run**. The variable need not be immediately assigned. The value evaluated from the last expression is returned.
+
+```{julia}
+let x  # x need not be immediately assigned
+    x = 1
+end
+```
+
+The `let` syntax accepts a comma-separated series of assignments and variable names.
+
+```{julia}
+x, y = 1, 2
+
+let x = x, y = 20
+    @show x, y
+end
+```
+
+**Note:** in the above example, `x = x` is possible, since the assignment is evaluated from the right to the left. `x` in the right-hand side is global; `x` in the left-hand side is local.
+
+#### Loops
+
+A `for` loop iteration variable is always a new local variable; otherwise you declare it using the `outer` keyword.
+
+```{julia}
+function for_f1()
+    i = 0
+    for i = 1:3  # i is local
+    end
+    return i
+end
+
+for_f1()
+```
+
+```{julia}
+function for_f2()
+    i = 0
+    for outer i = 1:3  # i is global
+    end
+    return i
+end
+
+for_f2()
+```
+
+A noteworthy fact is that you must declare `i` using the `global` keyword in the following code or an error will be raised when you run it in non-interactive mode:
+
+```{julia}
+#| error: true
+
+code = """
+    i = 10
+    while i <= 12
+        i = i + 1  # i is regarded as a local instead of a global since this is determined regardless of the order of expressions
+        @show i
+    end
+    @show i
+"""
+
+include_string(Main, code)
+```
+
+```{julia}
+code = """
+    i = 10
+    while i <= 12
+        global i = i + 1  # i is global
+        @show i
+    end
+    @show i
+"""
+
+include_string(Main, code)
+```
+
+#### Constants
+
+The `const` declaration should only be used in global scope on globals. It is difficult for the compiler to optimize code involving global variables, since their values (or even their types) might change at almost any time. If a global variable will not change, adding a `const` declaration solves this performance problem.
+
+Local constants are quite different. The compiler is able to determine automatically when a local variable is constant, so local constant declarations are not necessary, and in fact are currently not supported.
+
+#### Typed globals
+
+A global can be declared to always be of a constant type by using the syntax `global x::T` or upon assignment as `x::T = 123`.
+
+Once a global is declared to be of a constant type, it cannot be assigned to values which cannot be converted to the specified type. In addition, a global has either been assigned to or its type has been set, the binding type is not allowed to change.
 
 ## Julia documentation system
 
