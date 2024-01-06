@@ -14,7 +14,94 @@ jupyter: julia-1.9
 
 ## Pseudorandom number generation
 
+For pseudorandom number generation, there is some deterministic (non-random and well defined) sequence $\{x_n\}$, specified by
+
+$$
+x_{n+1} = f(x_n, x_{n-1}, ...)
+$$
+
+originating from some specified *seed* $x_0$. The mathematical function $f(\cdot)$ is designed to yield desirable properties for the sequence $\{x_n\}$ that make it appear random.
+
+Those properties include:
+
+1.  Elements $x_i$ and $x_j$ for $i \neq j$ should appear statistically independent. That is, knowing the value of $x_i$ should not yield any information about the value $x_j$.
+
+2.  The distribution of $\{x_n\}$ should appear uniform. That is, there shouldn't be values (or ranges of values) where elements of $\{x_n\}$ occur more frequently than others.
+
+3.  The range covered by $\{x_n\}$ should be well defined.
+
+4.  The sequence should repeat itself as rarely as possible.
+
+In Julia, the main player for pseudorandom number generation is the function `rand()`, which generates a random number in each call without giving any arguments once a seed is set (it is usually set to the current time by default). You can set the seed yourself by using the `Random.seed!()` function from the Random package.
+
+```{julia}
+using Random
+
+Random.seed!(2023)
+println("Seed 2023: ", rand(), "\t", rand(), "\t", rand())
+Random.seed!(2024)
+println("Seed 2024: ", rand(), "\t", rand(), "\t", rand())
+Random.seed!(2023)
+println("Seed 2023: ", rand(), "\t", rand(), "\t", rand())
+```
+
+As can be seen from the output, setting the same seed will generate the same sequence.
+
+### Creating a simple pseudorandom number generator
+
+### More about Julia's pseudorandom number generator
+
 ## Monte Carlo simulation
+
+The core idea of Monte Carlo simulation lies in building a mathematical relationship between an unknown quantity to be estimated and the probability of a certain event, which can be estimated by statistical sampling. Then, we can get an estimate of this unknown quantity.
+
+We can use this idea to estimate the value of $\pi$.
+
+```{julia}
+using DataFrames, AlgebraOfGraphics, CairoMakie
+
+set_theme!(theme_minimal())
+
+line_df  = DataFrame(x = [0, 0, 1, 1, 0],
+                     y = [0, 1, 1, 0, 0])
+
+x = range(0, 1, length = 1000)
+quarter_circle_df = DataFrame(x = x,
+                              y = @. sqrt(1 - x^2))
+
+rect = data(line_df) * mapping(:x, :y) * visual(Lines)
+quarter_circle = data(quarter_circle_df) * mapping(:x, :y) * visual(Lines)
+draw(rect + quarter_circle, axis = (limits = (0, nothing, 0, nothing),))
+```
+
+As can be seen from the above figure, we know:
+
+1.  The area of the unit square is 1;
+
+2.  The area of the first quadrant of the unit circle is $\pi / 4$;
+
+3.  Then, if we randomly throw a ball within the unit square, the probability of the event that this ball falls into the area of the first quadrant of the unit circle is $\pi / 4$. Further, we know that the probability of this event can be estimated by its frequency if we repeat this experiment infinitely many times; therefore, we can estimate the value of $\pi$ by the following formula:
+
+$$
+\hat{\pi} = 4 \frac{\text{The number of times falling in }x^2 + y^2 \leq 1}{\text{Total number of times}}
+$$
+
+```{julia}
+using Random, LinearAlgebra, AlgebraOfGraphics, CairoMakie, DataFrames
+
+Random.seed!(1234)
+
+N = 10^5
+df = DataFrame([(x = rand(), y = rand()) for _ in 1:N])
+transform!(df, [:x, :y] => ByRow((x, y) -> ifelse(norm([x, y]) <= 1, "in", "out")) => :flag)
+pi_estimate = 4 * count(df.flag .== "in") / N
+println("π estimate: ", pi_estimate)
+
+fig = Figure()
+p = data(df) * mapping(:x, :y, color = :flag) * visual(Scatter, markersize = 1)
+draw!(fig, p, axis = (limits = (0, nothing, 0, nothing),))
+fig
+```
 
 ## Appendices
 
