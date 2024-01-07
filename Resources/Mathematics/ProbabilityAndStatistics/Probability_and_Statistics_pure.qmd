@@ -1,0 +1,127 @@
+---
+title: "Probability and Statistics (Pure)"
+author: "Rui Yang"
+date: "01/05/2024"
+format:
+  html:
+    toc: true
+    toc-depth: 6
+    toc-location: left
+    number-sections: true
+    number-depth: 6
+jupyter: julia-1.9
+---
+
+## From the book *Calculus with applications* by *Peter D. Lax*
+
+### Probability
+
+Probability is the branch of mathematics that deals with **events** whose **individual outcomes** are **unpredictable**, but whose outcomes **on average** are **predictable**.
+
+Experiments can be divided into two types:
+
+-   **Deterministic:** whose individual outcomes are predictable;
+
+-   **Nondeterministic (random):** whose individual outcomes are unpredictable.
+
+#### Discrete probability
+
+Next, all experiments we'll deal with are *repeatable* (it can be performed repeatedly any number of times) and *random* (any single performance of the experiment is unpredictable).
+
+In this section, we'll deal with experiments having *a finite number of possible outcomes*. We denote the number of possible outcomes by $n$, and number them from $1$ to $n$.
+
+##### The probability of any single outcome
+
+In a random and repeatable experiment, if we denote $S_j$ by *the number of instances* among the first $N$ experiments where the $j$th outcome was observed to occur, then the frequency $\frac{S_j}{N}$ with which the $j$th outcome has been observed to occur tends to a limit as $N$ tends to infinity. We call this limit the probability of the $j$th outcome and denote it by $p_j$:
+
+$$
+p_j = \lim\limits_{N \to \infty} \frac{S_j}{N}
+$$
+
+These probabilities have the following properties:
+
+-   $0 \leq p_j \leq 1$;
+
+::: callout-note
+For $\frac{S_j}{N}$ lies between $0$ and $1$, and therefore so does its limit $p_j$.
+:::
+
+-   $\sum_{j=1}^{n} p_j = 1$.
+
+::: callout-note
+We have
+
+$$
+S_1 + S_2 + \cdots + S_n = N
+$$
+
+Dividing by $N$, we get
+
+$$
+\frac{S_1}{N} + \frac{S_2}{N} + \cdots + \frac{S_n}{N} = 1
+$$
+
+As $N$ tends to infinity, we have
+
+$$
+\lim\limits_{N \to \infty} \sum_{j=1}^{n} \frac{S_j}{N} = \lim\limits_{N \to \infty} \sum_{j=1}^{n} p_j = 1
+$$
+:::
+
+##### The probability of an event
+
+In fact very often, we are not interested in all the details of the outcome of an experiment, but merely in a particular aspect of it (e.g. throwing a die, we may be interested only in whether the outcome is even or odd).
+
+An occurrence such as throwing an even number is called an *event*, which is defined as the following:
+
+> An event $E$ is defined as **any collection of possible outcomes**.
+
+**Note:** we say that an event $E$ occurred whenever any outcome belonging to $E$ occurred.
+
+The probability $p(E)$ of an event $E$ is
+
+$$
+p(E) = \lim\limits_{N \to \infty} \frac{S(E)}{N}
+$$
+
+where $S(E)$ is the number of instances among the first $N$ experiments when the event $E$ took place.
+
+::: callout-note
+We have
+
+$$
+S(E) = \sum_{j\ \text{in}\ E} S_j
+$$
+
+Dividing by $N$
+
+$$
+\frac{S(E)}{N} = \sum_{j\ \text{in}\ E} \frac{S_j}{N}
+$$
+
+As $N$ tends to infinity, we have
+
+$$
+p(E) = \sum_{j\ \text{in}\ E} p_j
+$$
+:::
+
+###### The arithmetic rules of probability of some special events
+
+1. Addition rule for disjoint events
+
+2. Product rule for independent events
+
+##### Characteristics of random variables
+
+1. Numerical outcome
+
+2. Expectation
+
+3. Variance
+
+##### Some special distributions
+
+1. The bionomial distribution
+
+2. The Poisson distribution

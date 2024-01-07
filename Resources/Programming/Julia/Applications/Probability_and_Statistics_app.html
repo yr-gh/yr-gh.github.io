@@ -9,7 +9,7 @@
 <meta name="author" content="Rui Yang">
 <meta name="dcterms.date" content="2024-01-05">
 
-<title>Probability and Statistics</title>
+<title>Probability and Statistics (Applications)</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -59,16 +59,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="Probability_and_Statistics_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Probability_and_Statistics_files/libs/quarto-html/quarto.js"></script>
-<script src="Probability_and_Statistics_files/libs/quarto-html/popper.min.js"></script>
-<script src="Probability_and_Statistics_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="Probability_and_Statistics_files/libs/quarto-html/anchor.min.js"></script>
-<link href="Probability_and_Statistics_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Probability_and_Statistics_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="Probability_and_Statistics_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="Probability_and_Statistics_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="Probability_and_Statistics_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="Probability_and_Statistics_app_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Probability_and_Statistics_app_files/libs/quarto-html/quarto.js"></script>
+<script src="Probability_and_Statistics_app_files/libs/quarto-html/popper.min.js"></script>
+<script src="Probability_and_Statistics_app_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Probability_and_Statistics_app_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Probability_and_Statistics_app_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Probability_and_Statistics_app_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Probability_and_Statistics_app_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Probability_and_Statistics_app_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Probability_and_Statistics_app_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -129,7 +129,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Probability and Statistics</h1>
+<h1 class="title">Probability and Statistics (Applications)</h1>
 </div>
 
 
@@ -173,7 +173,7 @@ x_{n+1} = f(x_n, x_{n-1}, ...)
 <li><p>The sequence should repeat itself as rarely as possible.</p></li>
 </ol>
 <p>In Julia, the main player for pseudorandom number generation is the function <code>rand()</code>, which generates a random number in each call without giving any arguments once a seed is set (it is usually set to the current time by default). You can set the seed yourself by using the <code>Random.seed!()</code> function from the Random package.</p>
-<div id="9d2d5ccd" class="cell" data-execution_count="1">
+<div id="0e7db5d0" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Random</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Random</span>.<span class="fu">seed!</span>(<span class="fl">2023</span>)</span>
@@ -193,7 +193,7 @@ Seed 2023: 0.1321419481484759   0.37179020701747134 0.9005132318421792</code></p
 <h3 data-number="1.1" class="anchored" data-anchor-id="creating-a-simple-pseudorandom-number-generator"><span class="header-section-number">1.1</span> Creating a simple pseudorandom number generator</h3>
 <p>Here, we create a <em>Linear Congruential Generator</em> (LCG). The function <span class="math inline">\(f(\cdot)\)</span> used here is just a linear transformation modulo <span class="math inline">\(m\)</span>: <span class="math inline">\(x_{n+1} = (ax_n + c) \mod m\)</span>.</p>
 <p>Here, we pick <span class="math inline">\(m = 2^{32}\)</span>, <span class="math inline">\(a = 69069\)</span>, <span class="math inline">\(c = 1\)</span>, which yields sensible performance.</p>
-<div id="b959bdad" class="cell" data-execution_count="2">
+<div id="545fe8ea" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">DataFrames</span>, <span class="bu">AlgebraOfGraphics</span>, <span class="bu">CairoMakie</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>a, c, m <span class="op">=</span> <span class="fl">69069</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">^</span><span class="fl">32</span></span>
@@ -222,7 +222,7 @@ Seed 2023: 0.1321419481484759   0.37179020701747134 0.9005132318421792</code></p
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div>
 <figure class="figure">
-<p><img src="Probability_and_Statistics_files/figure-html/cell-3-output-2.svg" class="img-fluid figure-img"></p>
+<p><img src="Probability_and_Statistics_app_files/figure-html/cell-3-output-2.svg" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -247,7 +247,7 @@ Seed 2023: 0.1321419481484759   0.37179020701747134 0.9005132318421792</code></p
 <h2 data-number="2" class="anchored" data-anchor-id="monte-carlo-simulation"><span class="header-section-number">2</span> Monte Carlo simulation</h2>
 <p>The core idea of Monte Carlo simulation lies in building a mathematical relationship between an unknown quantity to be estimated and the probability of a certain event, which can be estimated by statistical sampling. Then, we can get an estimate of this unknown quantity.</p>
 <p>We can use this idea to estimate the value of <span class="math inline">\(\pi\)</span>.</p>
-<div id="77f2ea28" class="cell" data-execution_count="3">
+<div id="3d2ff70b" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">DataFrames</span>, <span class="bu">AlgebraOfGraphics</span>, <span class="bu">CairoMakie</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>line_df  <span class="op">=</span> <span class="fu">DataFrame</span>(x <span class="op">=</span> [<span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span>],</span>
@@ -267,7 +267,7 @@ Seed 2023: 0.1321419481484759   0.37179020701747134 0.9005132318421792</code></p
 <div class="cell-output cell-output-display" data-execution_count="4">
 <div>
 <figure class="figure">
-<p><img src="Probability_and_Statistics_files/figure-html/cell-4-output-2.svg" class="img-fluid figure-img"></p>
+<p><img src="Probability_and_Statistics_app_files/figure-html/cell-4-output-2.svg" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -281,7 +281,7 @@ Seed 2023: 0.1321419481484759   0.37179020701747134 0.9005132318421792</code></p
 <p><span class="math display">\[
 \hat{\pi} = 4 \frac{\text{The number of times falling in }x^2 + y^2 \leq 1}{\text{Total number of times}}
 \]</span></p>
-<div id="d4d48740" class="cell" data-execution_count="4">
+<div id="9af012cf" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Random</span>, <span class="bu">LinearAlgebra</span>, <span class="bu">AlgebraOfGraphics</span>, <span class="bu">CairoMakie</span>, <span class="bu">DataFrames</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Random</span>.<span class="fu">seed!</span>(<span class="fl">1234</span>)</span>
@@ -306,7 +306,7 @@ Seed 2023: 0.1321419481484759   0.37179020701747134 0.9005132318421792</code></p
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div>
 <figure class="figure">
-<p><img src="Probability_and_Statistics_files/figure-html/cell-5-output-3.svg" class="img-fluid figure-img"></p>
+<p><img src="Probability_and_Statistics_app_files/figure-html/cell-5-output-3.svg" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
