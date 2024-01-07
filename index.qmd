@@ -118,3 +118,7 @@ A unifying parallelization framework at <https://www.futureverse.org/>.
 ### Packages for data science
 
 * `DataFrames`: an infrastructure for tabular data manipulation (guide at <https://dataframes.juliadata.org/stable>).
+
+* 'Makie': a data visualization ecosystem with high performance and extensibility (guide at <https://docs.makie.org/stable>).
+
+* `AlgebraOfGraphics`: defines a language for data visualization based on `Makie` (guide at <https://aog.makie.org/stable>).

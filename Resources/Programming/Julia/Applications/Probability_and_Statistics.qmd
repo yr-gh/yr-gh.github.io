@@ -49,7 +49,53 @@ As can be seen from the output, setting the same seed will generate the same seq
 
 ### Creating a simple pseudorandom number generator
 
+Here, we create a *Linear Congruential Generator* (LCG). The function $f(\cdot)$ used here is just a linear transformation modulo $m$: $x_{n+1} = (ax_n + c) \mod m$.
+
+Here, we pick $m = 2^{32}$, $a = 69069$, $c = 1$, which yields sensible performance.
+
+```{julia}
+using DataFrames, AlgebraOfGraphics, CairoMakie
+
+a, c, m = 69069, 1, 2^32
+next(x) = (a*x + c) % m
+
+N = 10^6
+vec = Array{Float64, 1}(undef, N)
+
+x = 2024  # Seed
+for i in 1:N
+    global x = next(x)
+    vec[i] = x/m  # Scale x to [0, 1]
+end
+df = DataFrame(x = 1:N, y = vec)
+
+fig = Figure()
+p1 = data(first(df, 5000)) * mapping(:x, :y) * visual(Scatter, markersize = 3)
+p2 = data(df) * mapping(:y) * visual(Hist, bins = 50, normalization = :pdf)
+draw!(fig[1, 1], p1, axis = (xlabel = "n", ylabel = L"\mathbf{x_n}"))
+draw!(fig[1, 2], p2, axis = (xlabel = "x", ylabel = "Density"))
+fig
+```
+
 ### More about Julia's pseudorandom number generator
+
+In addition to `rand()`, we can also use `randn()` to generate **normally distributed** random numbers.
+
+After invoking `using Random`, the following functions are available:
+
+- `Random.seed!()`
+
+- `randsubseq()`
+
+- `randstring()`
+
+- `randcycle()`
+
+- `bitrand()`
+
+- `randperm()` and `shuffle()` for permutations
+
+In addition, in Julia, we can create an object representing a pseudorandom number generator implemented via a specified algorithm, for example, the *Mersenne Twister* pseudorandom number generator, which is considerably more complicated than the LCG described above. In Julia, we can create such an object of the *Mersenne Twister* pseudorandom number generator by calling `rng = MersenneTwister(seed)`, and then pass the `rng` to `rand()` to let it use the given pseudorandom number generator to generate pseudorandom numbers.
 
 ## Monte Carlo simulation
 
@@ -59,8 +105,6 @@ We can use this idea to estimate the value of $\pi$.
 
 ```{julia}
 using DataFrames, AlgebraOfGraphics, CairoMakie
-
-set_theme!(theme_minimal())
 
 line_df  = DataFrame(x = [0, 0, 1, 1, 0],
                      y = [0, 1, 1, 0, 0])

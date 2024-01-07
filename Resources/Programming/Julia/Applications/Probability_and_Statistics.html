@@ -173,7 +173,7 @@ x_{n+1} = f(x_n, x_{n-1}, ...)
 <li><p>The sequence should repeat itself as rarely as possible.</p></li>
 </ol>
 <p>In Julia, the main player for pseudorandom number generation is the function <code>rand()</code>, which generates a random number in each call without giving any arguments once a seed is set (it is usually set to the current time by default). You can set the seed yourself by using the <code>Random.seed!()</code> function from the Random package.</p>
-<div id="3b5643ff" class="cell" data-execution_count="1">
+<div id="9d2d5ccd" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Random</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Random</span>.<span class="fu">seed!</span>(<span class="fl">2023</span>)</span>
@@ -191,34 +191,83 @@ Seed 2023: 0.1321419481484759   0.37179020701747134 0.9005132318421792</code></p
 <p>As can be seen from the output, setting the same seed will generate the same sequence.</p>
 <section id="creating-a-simple-pseudorandom-number-generator" class="level3" data-number="1.1">
 <h3 data-number="1.1" class="anchored" data-anchor-id="creating-a-simple-pseudorandom-number-generator"><span class="header-section-number">1.1</span> Creating a simple pseudorandom number generator</h3>
+<p>Here, we create a <em>Linear Congruential Generator</em> (LCG). The function <span class="math inline">\(f(\cdot)\)</span> used here is just a linear transformation modulo <span class="math inline">\(m\)</span>: <span class="math inline">\(x_{n+1} = (ax_n + c) \mod m\)</span>.</p>
+<p>Here, we pick <span class="math inline">\(m = 2^{32}\)</span>, <span class="math inline">\(a = 69069\)</span>, <span class="math inline">\(c = 1\)</span>, which yields sensible performance.</p>
+<div id="b959bdad" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">DataFrames</span>, <span class="bu">AlgebraOfGraphics</span>, <span class="bu">CairoMakie</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>a, c, m <span class="op">=</span> <span class="fl">69069</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">^</span><span class="fl">32</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">next</span>(x) <span class="op">=</span> (a<span class="op">*</span>x <span class="op">+</span> c) <span class="op">%</span> m</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="fl">6</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>vec <span class="op">=</span> <span class="fu">Array</span><span class="dt">{Float64, 1}</span>(<span class="cn">undef</span>, N)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="fl">2024</span>  <span class="co"># Seed</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>N</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">global</span> x <span class="op">=</span> <span class="fu">next</span>(x)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    vec[i] <span class="op">=</span> x<span class="op">/</span>m  <span class="co"># Scale x to [0, 1]</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> <span class="fu">DataFrame</span>(x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span>N, y <span class="op">=</span> vec)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> <span class="fu">Figure</span>()</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>p1 <span class="op">=</span> <span class="fu">data</span>(<span class="fu">first</span>(df, <span class="fl">5000</span>)) <span class="op">*</span> <span class="fu">mapping</span>(<span class="op">:</span>x, <span class="op">:</span>y) <span class="op">*</span> <span class="fu">visual</span>(Scatter, markersize <span class="op">=</span> <span class="fl">3</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>p2 <span class="op">=</span> <span class="fu">data</span>(df) <span class="op">*</span> <span class="fu">mapping</span>(<span class="op">:</span>y) <span class="op">*</span> <span class="fu">visual</span>(Hist, bins <span class="op">=</span> <span class="fl">50</span>, normalization <span class="op">=</span> <span class="op">:</span>pdf)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">draw!</span>(fig[<span class="fl">1</span>, <span class="fl">1</span>], p1, axis <span class="op">=</span> (xlabel <span class="op">=</span> <span class="st">"n"</span>, ylabel <span class="op">=</span> L<span class="st">"\mathbf{x_n}"</span>))</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="fu">draw!</span>(fig[<span class="fl">1</span>, <span class="fl">2</span>], p2, axis <span class="op">=</span> (xlabel <span class="op">=</span> <span class="st">"x"</span>, ylabel <span class="op">=</span> <span class="st">"Density"</span>))</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>┌ Warning: Found `resolution` in the theme when creating a `Scene`. The `resolution` keyword for `Scene`s and `Figure`s has been deprecated. Use `Figure(; size = ...` or `Scene(; size = ...)` instead, which better reflects that this is a unitless size and not a pixel resolution. The key could also come from `set_theme!` calls or related theming functions.
+└ @ Makie C:\Users\brain\.julia\packages\Makie\Qvk4f\src\scenes.jl:220</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+<figure class="figure">
+<p><img src="Probability_and_Statistics_files/figure-html/cell-3-output-2.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="more-about-julias-pseudorandom-number-generator" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="more-about-julias-pseudorandom-number-generator"><span class="header-section-number">1.2</span> More about Julia’s pseudorandom number generator</h3>
+<p>In addition to <code>rand()</code>, we can also use <code>randn()</code> to generate <strong>normally distributed</strong> random numbers.</p>
+<p>After invoking <code>using Random</code>, the following functions are available:</p>
+<ul>
+<li><p><code>Random.seed!()</code></p></li>
+<li><p><code>randsubseq()</code></p></li>
+<li><p><code>randstring()</code></p></li>
+<li><p><code>randcycle()</code></p></li>
+<li><p><code>bitrand()</code></p></li>
+<li><p><code>randperm()</code> and <code>shuffle()</code> for permutations</p></li>
+</ul>
+<p>In addition, in Julia, we can create an object representing a pseudorandom number generator implemented via a specified algorithm, for example, the <em>Mersenne Twister</em> pseudorandom number generator, which is considerably more complicated than the LCG described above. In Julia, we can create such an object of the <em>Mersenne Twister</em> pseudorandom number generator by calling <code>rng = MersenneTwister(seed)</code>, and then pass the <code>rng</code> to <code>rand()</code> to let it use the given pseudorandom number generator to generate pseudorandom numbers.</p>
 </section>
 </section>
 <section id="monte-carlo-simulation" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="monte-carlo-simulation"><span class="header-section-number">2</span> Monte Carlo simulation</h2>
 <p>The core idea of Monte Carlo simulation lies in building a mathematical relationship between an unknown quantity to be estimated and the probability of a certain event, which can be estimated by statistical sampling. Then, we can get an estimate of this unknown quantity.</p>
 <p>We can use this idea to estimate the value of <span class="math inline">\(\pi\)</span>.</p>
-<div id="37bb07d4" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">DataFrames</span>, <span class="bu">AlgebraOfGraphics</span>, <span class="bu">CairoMakie</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set_theme!</span>(<span class="fu">theme_minimal</span>())</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>line_df  <span class="op">=</span> <span class="fu">DataFrame</span>(x <span class="op">=</span> [<span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span>],</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                     y <span class="op">=</span> [<span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>])</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="fu">range</span>(<span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">1000</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>quarter_circle_df <span class="op">=</span> <span class="fu">DataFrame</span>(x <span class="op">=</span> x,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                              y <span class="op">=</span> @. <span class="fu">sqrt</span>(<span class="fl">1</span> <span class="op">-</span> x<span class="op">^</span><span class="fl">2</span>))</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>rect <span class="op">=</span> <span class="fu">data</span>(line_df) <span class="op">*</span> <span class="fu">mapping</span>(<span class="op">:</span>x, <span class="op">:</span>y) <span class="op">*</span> <span class="fu">visual</span>(Lines)</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>quarter_circle <span class="op">=</span> <span class="fu">data</span>(quarter_circle_df) <span class="op">*</span> <span class="fu">mapping</span>(<span class="op">:</span>x, <span class="op">:</span>y) <span class="op">*</span> <span class="fu">visual</span>(Lines)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">draw</span>(rect <span class="op">+</span> quarter_circle, axis <span class="op">=</span> (limits <span class="op">=</span> (<span class="fl">0</span>, <span class="cn">nothing</span>, <span class="fl">0</span>, <span class="cn">nothing</span>),))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div id="77f2ea28" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">DataFrames</span>, <span class="bu">AlgebraOfGraphics</span>, <span class="bu">CairoMakie</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>line_df  <span class="op">=</span> <span class="fu">DataFrame</span>(x <span class="op">=</span> [<span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span>],</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                     y <span class="op">=</span> [<span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>])</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="fu">range</span>(<span class="fl">0</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">1000</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>quarter_circle_df <span class="op">=</span> <span class="fu">DataFrame</span>(x <span class="op">=</span> x,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                              y <span class="op">=</span> @. <span class="fu">sqrt</span>(<span class="fl">1</span> <span class="op">-</span> x<span class="op">^</span><span class="fl">2</span>))</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>rect <span class="op">=</span> <span class="fu">data</span>(line_df) <span class="op">*</span> <span class="fu">mapping</span>(<span class="op">:</span>x, <span class="op">:</span>y) <span class="op">*</span> <span class="fu">visual</span>(Lines)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>quarter_circle <span class="op">=</span> <span class="fu">data</span>(quarter_circle_df) <span class="op">*</span> <span class="fu">mapping</span>(<span class="op">:</span>x, <span class="op">:</span>y) <span class="op">*</span> <span class="fu">visual</span>(Lines)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="fu">draw</span>(rect <span class="op">+</span> quarter_circle, axis <span class="op">=</span> (limits <span class="op">=</span> (<span class="fl">0</span>, <span class="cn">nothing</span>, <span class="fl">0</span>, <span class="cn">nothing</span>),))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>┌ Warning: Found `resolution` in the theme when creating a `Scene`. The `resolution` keyword for `Scene`s and `Figure`s has been deprecated. Use `Figure(; size = ...` or `Scene(; size = ...)` instead, which better reflects that this is a unitless size and not a pixel resolution. The key could also come from `set_theme!` calls or related theming functions.
+└ @ Makie C:\Users\brain\.julia\packages\Makie\Qvk4f\src\scenes.jl:220</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="4">
 <div>
 <figure class="figure">
-<p><img src="Probability_and_Statistics_files/figure-html/cell-3-output-1.svg" class="img-fluid figure-img"></p>
+<p><img src="Probability_and_Statistics_files/figure-html/cell-4-output-2.svg" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -232,28 +281,32 @@ Seed 2023: 0.1321419481484759   0.37179020701747134 0.9005132318421792</code></p
 <p><span class="math display">\[
 \hat{\pi} = 4 \frac{\text{The number of times falling in }x^2 + y^2 \leq 1}{\text{Total number of times}}
 \]</span></p>
-<div id="31ddd920" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Random</span>, <span class="bu">LinearAlgebra</span>, <span class="bu">AlgebraOfGraphics</span>, <span class="bu">CairoMakie</span>, <span class="bu">DataFrames</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Random</span>.<span class="fu">seed!</span>(<span class="fl">1234</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="fl">5</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> <span class="fu">DataFrame</span>([(x <span class="op">=</span> <span class="fu">rand</span>(), y <span class="op">=</span> <span class="fu">rand</span>()) for _ <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>N])</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">transform!</span>(df, [<span class="op">:</span>x, <span class="op">:</span>y] <span class="op">=&gt;</span> <span class="fu">ByRow</span>((x, y) <span class="op">-&gt;</span> <span class="fu">ifelse</span>(<span class="fu">norm</span>([x, y]) <span class="op">&lt;=</span> <span class="fl">1</span>, <span class="st">"in"</span>, <span class="st">"out"</span>)) <span class="op">=&gt;</span> <span class="op">:</span>flag)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>pi_estimate <span class="op">=</span> <span class="fl">4</span> <span class="op">*</span> <span class="fu">count</span>(df.flag <span class="op">.==</span> <span class="st">"in"</span>) <span class="op">/</span> N</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span>(<span class="st">"π estimate: "</span>, pi_estimate)</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> <span class="fu">Figure</span>()</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">data</span>(df) <span class="op">*</span> <span class="fu">mapping</span>(<span class="op">:</span>x, <span class="op">:</span>y, color <span class="op">=</span> <span class="op">:</span>flag) <span class="op">*</span> <span class="fu">visual</span>(Scatter, markersize <span class="op">=</span> <span class="fl">1</span>)</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">draw!</span>(fig, p, axis <span class="op">=</span> (limits <span class="op">=</span> (<span class="fl">0</span>, <span class="cn">nothing</span>, <span class="fl">0</span>, <span class="cn">nothing</span>),))</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="d4d48740" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Random</span>, <span class="bu">LinearAlgebra</span>, <span class="bu">AlgebraOfGraphics</span>, <span class="bu">CairoMakie</span>, <span class="bu">DataFrames</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Random</span>.<span class="fu">seed!</span>(<span class="fl">1234</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="fl">5</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> <span class="fu">DataFrame</span>([(x <span class="op">=</span> <span class="fu">rand</span>(), y <span class="op">=</span> <span class="fu">rand</span>()) for _ <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>N])</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">transform!</span>(df, [<span class="op">:</span>x, <span class="op">:</span>y] <span class="op">=&gt;</span> <span class="fu">ByRow</span>((x, y) <span class="op">-&gt;</span> <span class="fu">ifelse</span>(<span class="fu">norm</span>([x, y]) <span class="op">&lt;=</span> <span class="fl">1</span>, <span class="st">"in"</span>, <span class="st">"out"</span>)) <span class="op">=&gt;</span> <span class="op">:</span>flag)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>pi_estimate <span class="op">=</span> <span class="fl">4</span> <span class="op">*</span> <span class="fu">count</span>(df.flag <span class="op">.==</span> <span class="st">"in"</span>) <span class="op">/</span> N</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span>(<span class="st">"π estimate: "</span>, pi_estimate)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> <span class="fu">Figure</span>()</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fu">data</span>(df) <span class="op">*</span> <span class="fu">mapping</span>(<span class="op">:</span>x, <span class="op">:</span>y, color <span class="op">=</span> <span class="op">:</span>flag) <span class="op">*</span> <span class="fu">visual</span>(Scatter, markersize <span class="op">=</span> <span class="fl">1</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">draw!</span>(fig, p, axis <span class="op">=</span> (limits <span class="op">=</span> (<span class="fl">0</span>, <span class="cn">nothing</span>, <span class="fl">0</span>, <span class="cn">nothing</span>),))</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>π estimate: 3.14688</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div class="cell-output cell-output-stderr">
+<pre><code>┌ Warning: Found `resolution` in the theme when creating a `Scene`. The `resolution` keyword for `Scene`s and `Figure`s has been deprecated. Use `Figure(; size = ...` or `Scene(; size = ...)` instead, which better reflects that this is a unitless size and not a pixel resolution. The key could also come from `set_theme!` calls or related theming functions.
+└ @ Makie C:\Users\brain\.julia\packages\Makie\Qvk4f\src\scenes.jl:220</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="5">
 <div>
 <figure class="figure">
-<p><img src="Probability_and_Statistics_files/figure-html/cell-4-output-2.svg" class="img-fluid figure-img"></p>
+<p><img src="Probability_and_Statistics_files/figure-html/cell-5-output-3.svg" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
