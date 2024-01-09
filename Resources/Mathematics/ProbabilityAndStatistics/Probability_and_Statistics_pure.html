@@ -90,6 +90,7 @@ window.Quarto = {
   <li><a href="#characteristics-of-random-variables" id="toc-characteristics-of-random-variables" class="nav-link" data-scroll-target="#characteristics-of-random-variables"><span class="header-section-number">1.1.1.3</span> Characteristics of random variables</a></li>
   <li><a href="#some-special-distributions" id="toc-some-special-distributions" class="nav-link" data-scroll-target="#some-special-distributions"><span class="header-section-number">1.1.1.4</span> Some special distributions</a></li>
   </ul></li>
+  <li><a href="#continuous-probability" id="toc-continuous-probability" class="nav-link" data-scroll-target="#continuous-probability"><span class="header-section-number">1.1.2</span> Continuous probability</a></li>
   </ul></li>
   </ul></li>
   </ul>
@@ -235,26 +236,462 @@ p(E) = \sum_{j\ \text{in}\ E} p_j
 <section id="the-arithmetic-rules-of-probability-of-some-special-events" class="level6" data-number="1.1.1.2.1">
 <h6 data-number="1.1.1.2.1" class="anchored" data-anchor-id="the-arithmetic-rules-of-probability-of-some-special-events"><span class="header-section-number">1.1.1.2.1</span> The arithmetic rules of probability of some special events</h6>
 <ol type="1">
-<li><p>Addition rule for disjoint events</p></li>
-<li><p>Product rule for independent events</p></li>
+<li>Addition rule for disjoint events</li>
 </ol>
+<p>Two events <span class="math inline">\(E_1\)</span> and <span class="math inline">\(E_2\)</span> are called <em>disjoint</em> if both cannot take place simultaneously (i.e.&nbsp;<span class="math inline">\(E_1 \cap E_2 = \emptyset\)</span>).</p>
+<p>Then we have</p>
+<p><span class="math display">\[
+p(E_1 \cup E_2) = p(E_1) + p(E_2)
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><span class="math display">\[
+p(E_1 \cup E_2) = \sum_{j\ \text{in}\ E_1\ \text{or}\ E_2} p_j
+\]</span></p>
+<p>Disjointness means that an outcome <span class="math inline">\(j\)</span> may belong either to <span class="math inline">\(E_1\)</span> or to <span class="math inline">\(E_2\)</span> <strong>but not to both</strong>; therefore,</p>
+<p><span class="math display">\[
+p(E_1 \cup E_2) = \sum_{j\ \text{in}\ E_1\ \text{or}\ E_2} p_j = \sum_{j\ \text{in}\ E_1} p_j + \sum_{j\ \text{in}\ E_2} p_j = p(E_1) + p(E_2)
+\]</span></p>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Product rule for independent events</li>
+</ol>
+<p>Two events <span class="math inline">\(E\)</span> and <span class="math inline">\(F\)</span> are called <em>independent</em> if the outcome of one cannot influence the other, nor is the outcome of both under the influence of a common cause.</p>
+<p>Then we have</p>
+<p><span class="math display">\[
+p(E \cap F) = p(E)p(F)
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Among the first <span class="math inline">\(N\)</span> experiments, count the number of times <span class="math inline">\(E\)</span> has occurred (<span class="math inline">\(S(E)\)</span>), F has occurred (<span class="math inline">\(S(F)\)</span>), and <span class="math inline">\(E \cap F\)</span> has occurred (<span class="math inline">\(S(E \cap F)\)</span>). Then we have</p>
+<p><span class="math display">\[
+p(E) = \lim\limits_{N \to \infty} \frac{S(E)}{N}
+\]</span></p>
+<p><span class="math display">\[
+p(F) = \lim\limits_{N \to \infty} \frac{S(F)}{N}
+\]</span></p>
+<p><span class="math display">\[
+p(E \cap F) = \lim\limits_{N \to \infty} \frac{S(E \cap F)}{N}
+\]</span></p>
+<p>Suppose that we single out from the sequence of combined experiments the subsequence of those where <span class="math inline">\(E\)</span> occurred. The frequency of occurrence of <span class="math inline">\(F\)</span> in this subsequence is <span class="math inline">\(\frac{S(E \cap F)}{S(E)}\)</span>. If the two events <span class="math inline">\(E\)</span> and <span class="math inline">\(F\)</span> are truly independent, the frequency with which <span class="math inline">\(F\)</span> occurs in this subsequence should be the same as the frequency with which <span class="math inline">\(F\)</span> occurs in the original sequence, i.e.</p>
+<p><span class="math display">\[
+\lim\limits_{N \to \infty} \frac{S(E \cap F)}{S(E)} = \lim\limits_{N \to \infty} \frac{S(F)}{N} = p(F)
+\]</span></p>
+<p>We write the frequency of <span class="math inline">\(\frac{S(E \cap F)}{N}\)</span> as the product</p>
+<p><span class="math display">\[
+\frac{S(E \cap F)}{N} = \frac{S(E \cap F)}{S(E)}\frac{S(E)}{N}
+\]</span></p>
+<p>Then we have</p>
+<p><span class="math display">\[
+p(E \cap F) = \lim\limits_{N \to \infty} \frac{S(E \cap F)}{N} = \lim\limits_{N \to \infty} \frac{S(E \cap F)}{S(E)} \cdot \lim\limits_{N \to \infty} \frac{S(E)}{N} = p(F)p(E)
+\]</span></p>
+</div>
+</div>
 </section>
 </section>
 <section id="characteristics-of-random-variables" class="level5" data-number="1.1.1.3">
 <h5 data-number="1.1.1.3" class="anchored" data-anchor-id="characteristics-of-random-variables"><span class="header-section-number">1.1.1.3</span> Characteristics of random variables</h5>
 <ol type="1">
-<li><p>Numerical outcome</p></li>
-<li><p>Expectation</p></li>
-<li><p>Variance</p></li>
+<li>Numerical outcome</li>
 </ol>
+<p>The numerical outcome of an experiment means the assignment of a real number <span class="math inline">\(x_j\)</span> to each of the possible outcomes.</p>
+<p>Note that different outcomes may be assigned the same number so we have to re-calculate the probability <span class="math inline">\(p(x_j)\)</span> for each <span class="math inline">\(x_j\)</span> with which <span class="math inline">\(x_j\)</span> occurred.</p>
+<ol start="2" type="1">
+<li>Expectation</li>
+</ol>
+<p>In a random experiment with <span class="math inline">\(n\)</span> possible outcomes of probability <span class="math inline">\(p_j\)</span> and numerical outcome <span class="math inline">\(x_j\)</span>, the average numerical outcome, called the mean of <span class="math inline">\(x\)</span> or expectation of <span class="math inline">\(x\)</span>, denoted by <span class="math inline">\(\bar{x}\)</span> or <span class="math inline">\(E(x)\)</span>, is given by the formula</p>
+<p><span class="math display">\[
+\bar{x} = E(x) = p_1x_1 + p_2x_2 + \cdots + p_nx_n
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Among the first <span class="math inline">\(N\)</span> experiments, denote by <span class="math inline">\(S_j\)</span> the number of instances with which the <span class="math inline">\(j\)</span>th outcome was observed. Then, the average numerical outcome is</p>
+<p><span class="math display">\[
+\frac{S_1x_1 + S_2x_2 + \cdots + S_nx_n}{N}
+\]</span></p>
+<p>As <span class="math inline">\(N \to \infty\)</span>, we have</p>
+<p><span class="math display">\[
+\bar{x} = E(x) = \lim\limits_{N \to \infty} \frac{S_1x_1 + S_2x_2 + \cdots + S_nx_n}{N} = p_1x_1 + p_2x_2 + \cdots + p_nx_n
+\]</span></p>
+</div>
+</div>
+<ol start="3" type="1">
+<li>Variance</li>
+</ol>
+<p>Next we are tempted to know such a fact: by how much do the numerical outcomes differ on average from the mean?</p>
+<p>This is characterized by the variance, the expectation of the square of the difference of the numerical outcome and its mean:</p>
+<p><span class="math display">\[
+V = \overline{(x - \bar{x})^2} = E((x - \bar{x})^2)
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><span class="math display">\[
+\begin{aligned}
+V &amp; = \overline{(x - \bar{x})^2} \\
+  &amp; = E((x - \bar{x})^2) \\
+  &amp; = \sum_{j=1}^{n} p_j (x_j - \bar{x})^2 \\
+  &amp; = p_1x_1^2 + \cdots + p_nx_n^2 - 2(p_1x_1 + \cdots + p_nx_n)\bar{x} + (\bar{x})^2 \\
+  &amp; = \bar{x^2} - (\bar{x})^2 \\
+  &amp; = E(x^2) - (E(x))^2
+\end{aligned}
+\]</span></p>
+</div>
+</div>
+<p><strong>Note:</strong> the square root of the variance <span class="math inline">\(\sqrt{V}\)</span> is called the standard deviation.</p>
 </section>
 <section id="some-special-distributions" class="level5" data-number="1.1.1.4">
 <h5 data-number="1.1.1.4" class="anchored" data-anchor-id="some-special-distributions"><span class="header-section-number">1.1.1.4</span> Some special distributions</h5>
 <ol type="1">
-<li><p>The bionomial distribution</p></li>
-<li><p>The Poisson distribution</p></li>
+<li>The binomial distribution</li>
 </ol>
+<p>Suppose a random experiment has two possible outcomes <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>, with probabilities <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> respectively, where <span class="math inline">\(p + q = 1\)</span>.</p>
+<p>Suppose we repeat the experiment <span class="math inline">\(N\)</span> times, and the repeated experiments are independent of each other.</p>
+<p>If we let <span class="math inline">\(k\)</span> (<span class="math inline">\(k = 0, 1, ..., N\)</span>) denote the number of times with which A occurs, then the probability that A occurs exactly <span class="math inline">\(k\)</span> times is given by the formula</p>
+<p><span class="math display">\[
+b_k(N) = \dbinom{N}{k} p^k q^{N-k}
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Since the outcomes of the experiments are independent of each other, the probability of a particular sequence of <span class="math inline">\(k\)</span> <span class="math inline">\(A\)</span>’s and <span class="math inline">\(N - k\)</span> <span class="math inline">\(B\)</span>’s is <span class="math inline">\(p^k q^{N-k}\)</span>.</p>
+<p>In addition, there are exactly <span class="math inline">\(\dbinom{N}{k}\)</span> arrangements of <span class="math inline">\(k\)</span> <span class="math inline">\(A\)</span>’s and <span class="math inline">\(N - k\)</span> <span class="math inline">\(B\)</span>’s, which are disjoint of each other.</p>
+</div>
+</div>
+<p>In addition, we have</p>
+<p><span class="math display">\[
+E(x) = \sum_{k=0}^{N} kp(x = k) = Np
+\]</span></p>
+<p><strong>Note:</strong> the binomial theorem is <span class="math inline">\((a + b)^N = \sum_{k=0}^{N} \dbinom{N}{k} a^k b^{N-k}\)</span>.</p>
+<ol type="1">
+<li>The Poisson distribution</li>
+</ol>
+<p>Suppose <strong>each week</strong> there are <strong>a large number of vehicles</strong> through a busy intersection and there are <strong>on average</strong> <span class="math inline">\(\mu\)</span> accidents.</p>
+<p>Suppose the probability of a vehicle having an accident is independent of the occurrence of previous accidents.</p>
+<p>Then we use a binomial distribution to determine the probability of <span class="math inline">\(k\)</span> accidents in a week:</p>
+<p>Setting <span class="math inline">\(p = \frac{\mu}{N}\)</span>, then we have</p>
+<p><span class="math display">\[
+\begin{aligned}
+b_k(N) &amp; = \dbinom{N}{k} p^k q^{N-k} \\
+       &amp; = \frac{N(N-1)...(N-k+1)}{k!} p^k q^{N-k} \\
+       &amp; = (1-\frac{1}{N}) \cdots (1-\frac{k-1}{N}) \frac{N^kp^k(1-p)^{N-k}}{k!} \\
+       &amp; = \frac{(1-\frac{1}{N}) \cdots (1-\frac{k-1}{N})}{(1-p)^k} \frac{\mu^k}{k!} (1-\frac{\mu}{N})^N
+\end{aligned}
+\]</span></p>
+<p>Since <span class="math inline">\(e^{-x} = \lim\limits_{n \to \infty} (1-\frac{x}{n})^n\)</span> (<span class="math inline">\(e^x = \lim\limits_{n \to \infty} (1+\frac{x}{n})^n\)</span>), then we have</p>
+<p><span class="math display">\[
+\lim\limits_{N \to \infty,\ \mu = Np} b_k(N) = \frac{\mu^k}{k!} e^{-\mu}
+\]</span></p>
+<p>This gives us an estimate for <span class="math inline">\(b_k(N)\)</span> when <span class="math inline">\(N\)</span> is <strong>large</strong>, <span class="math inline">\(p\)</span> is <strong>small</strong>, and <span class="math inline">\(Np = \mu\)</span>.</p>
+<p>The Poisson distribution is defined as</p>
+<p><span class="math display">\[
+p_k(\mu) = \frac{\mu^k}{k!} e^{-\mu}
+\]</span></p>
+<p>where <span class="math inline">\(\mu\)</span> is a parameter. <span class="math inline">\(p_k\)</span> is the probability of <span class="math inline">\(k\)</span> favorable outcomes, <span class="math inline">\(k = 0, 1, ...\)</span>.</p>
+<p>In addition, the combination of two Poisson processes is again a Poisson process.</p>
+<p>Denote by <span class="math inline">\(p_k(\mu)\)</span> and <span class="math inline">\(p_k(\nu)\)</span> the probability of <span class="math inline">\(k\)</span> favorable outcomes in these two processes. We claim that the probability of <span class="math inline">\(k\)</span> favorable outcomes when both experiments are performed is <span class="math inline">\(p_k(\mu + \nu)\)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>There will be <span class="math inline">\(k\)</span> favorable outcomes for the combined experiment if the first experiment has <span class="math inline">\(j\)</span> (<span class="math inline">\(j = 0, 1, ..., k\)</span>) favorable outcomes and the second experiment has <span class="math inline">\(k - j\)</span>.</p>
+<p>If the experiments are independent, the probability of such a combined outcome is the product of the probabilities <span class="math inline">\(p_j(\mu) p_{k-j}(\nu)\)</span>.</p>
+<p>So the probability of the combined experiment to have <span class="math inline">\(k\)</span> favorable outcomes is the sum</p>
+<p><span class="math display">\[
+\begin{aligned}
+\sum_j p_j(\mu) p_{k-j}(\nu) &amp; = \sum_j \frac{\mu^j}{j!} e^{-\mu} \frac{\nu^{k-j}}{(k-j)!} e^{-\nu} \\
+                             &amp; = \frac{1}{k!} e^{-(\mu + \nu)} \sum_j \frac{k!}{j!(k-j)!} \mu^j \nu^{(k-j)} \\
+                             &amp; = \frac{(\mu + \nu)^k}{k!} e^{-(\mu + \nu)}
+\end{aligned}
+\]</span></p>
+<p>which is the Poisson distribution <span class="math inline">\(p_k(\mu + \nu)\)</span>.</p>
+</div>
+</div>
 </section>
+</section>
+<section id="continuous-probability" class="level4" data-number="1.1.2">
+<h4 data-number="1.1.2" class="anchored" data-anchor-id="continuous-probability"><span class="header-section-number">1.1.2</span> Continuous probability</h4>
+<p>Suppose we have such an experiment making a physical measurement with an apparatus subject to random disturbances that can be reduced but not totally eliminated. Then every real number is a possible numerical outcome of such an experiment.</p>
+<p>Repeat the experiment as many times as we wish and denote by <span class="math inline">\(S(x)\)</span> the number of instances among the first <span class="math inline">\(N\)</span> performances for which the numerical outcome was <strong>less than</strong> <span class="math inline">\(x\)</span>.Then the frequency <span class="math inline">\(\frac{S(x)}{N}\)</span> with which this event occurs tends to a limit as <span class="math inline">\(N\)</span> tends to infinity. This limit is <strong>the probability</strong> that <strong>the outcome is less than</strong> <span class="math inline">\(\mathbfcal{x}\)</span>, and is denoted by <span class="math inline">\(P(x)\)</span>:</p>
+<p><span class="math display">\[
+P(x) = \lim\limits_{N \to \infty} \frac{S(x)}{N}
+\]</span></p>
+<p>The probability <span class="math inline">\(P(x)\)</span> has the following properties:</p>
+<ol type="1">
+<li><p><span class="math inline">\(0 \leq P(x) \leq 1\)</span>: <span class="math inline">\(0 \leq S(x) \leq N \implies 0 \leq \frac{S(x)}{N} \leq 1 \implies 0 \leq P(x) \leq 1\)</span>.</p></li>
+<li><p><span class="math inline">\(P(x)\)</span> is a <strong>nondecreasing</strong> function of <span class="math inline">\(x\)</span>: <span class="math inline">\(S(x)\)</span> is a <strong>nondecreasing</strong> function of <span class="math inline">\(x\)</span>, so that <span class="math inline">\(\frac{S(x)}{N}\)</span> is a <strong>nondecreasing</strong> function of <span class="math inline">\(x\)</span>; then so is the limit <span class="math inline">\(P(x)\)</span>.</p></li>
+<li><p><span class="math inline">\(P(x) \to 0\ (x \to -\infty)\)</span>.</p></li>
+<li><p><span class="math inline">\(P(x) \to 1\ (x \to \infty)\)</span>.</p></li>
+<li><p><span class="math inline">\(P(x)\)</span> is a continuously differentiable function (denote the derivative of <span class="math inline">\(P\)</span> by <span class="math inline">\(p\)</span>): <span class="math inline">\(\frac{\mathrm{d}P(x)}{dx} = p(x)\)</span>.</p></li>
+</ol>
+<p>The function <span class="math inline">\(p(x)\)</span> is called the <strong>probability density function</strong>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Addition rule for disjoint events">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Addition rule for disjoint events
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Suppose <span class="math inline">\(E\)</span> and <span class="math inline">\(F\)</span> are two events with probabilities <span class="math inline">\(P(E)\)</span> and <span class="math inline">\(P(F)\)</span> respectively.</p>
+<p>Suppose they are <strong>disjoint</strong> (i.e.&nbsp;<span class="math inline">\(E \cap F = \emptyset\)</span>).</p>
+<p>Then we have</p>
+<p><span class="math display">\[
+P(E \cup F) = P(E) + P(F)
+\]</span></p>
+<p>Let <span class="math inline">\(E: x &lt; a\)</span>, <span class="math inline">\(F: a \leq x &lt; b\)</span>, then we have <span class="math inline">\(E \cup F: x &lt; b\)</span>.</p>
+<p>Then we have</p>
+<p><span class="math display">\[
+P(E) = P(a),\ P(E \cup F) = P(b)
+\]</span></p>
+<p>We conclude that</p>
+<p><span class="math display">\[
+P(F) = P(b) - P(a)
+\]</span></p>
+<p>is the probability of <span class="math inline">\(a \leq x &lt; b\)</span>.</p>
+</div>
+</div>
+<p>According to the <strong>mean value theorem</strong>, for every <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, there is a number <span class="math inline">\(c\)</span> lying between <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> such that</p>
+<p><span class="math display">\[
+P(b) - P(a) = p(c)(b - a)
+\]</span></p>
+<p>According to the <strong>fundamental theorem of calculus</strong></p>
+<p><span class="math display">\[
+P(b) - P(a) = \int_a^b p(x)\mathrm{d}x
+\]</span></p>
+<p>According to <span class="math inline">\(P(a) \to 0\ (a \to -\infty)\)</span></p>
+<p><span class="math display">\[
+P(b) = \int_{-\infty}^b p(x)\mathrm{d}x
+\]</span></p>
+<p>According to <span class="math inline">\(P(b) \to 1\ (b \to \infty)\)</span></p>
+<p><span class="math display">\[
+1 = \int_{-\infty}^{\infty} p(x)\mathrm{d}x
+\]</span></p>
+<p>This is the continuous analogue of the basic fact that <span class="math inline">\(p_1 + p_2 + \cdots + p_n = 1\)</span> in discrete probability.</p>
+<ol start="7" type="1">
+<li><p><span class="math inline">\(p(x) \geq 0\)</span>: <span class="math inline">\(P(x)\)</span> is a nondecreasing function of <span class="math inline">\(x\)</span>.</p></li>
+<li><p>The expectation is:</p></li>
+</ol>
+<p><span class="math display">\[
+\bar{x} = \int_{-\infty}^{\infty} xp(x)\mathrm{d}x
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Imagine the experiment performed as many times as we wish, and denote the sequence of outcomes by</p>
+<p><span class="math display">\[
+a_1, a_2, ..., a_N, ...
+\]</span></p>
+<p>Divide the interval <span class="math inline">\(I\)</span> <strong>in which all outcomes lie</strong> into <span class="math inline">\(n\)</span> subintervals <span class="math inline">\(I_1, ..., I_n\)</span>. Denote the endpoints by</p>
+<p><span class="math display">\[
+e_0 &lt; e_1 &lt; \cdots &lt; e_n
+\]</span></p>
+<p>The probability of <span class="math inline">\(e_{j-1} \leq x &lt; e_j\)</span> (i.e.&nbsp;<span class="math inline">\(x\)</span> lies in the interval <span class="math inline">\(I_j\)</span>) is</p>
+<p><span class="math display">\[
+P_j = P(e_j) - P(e_{j-1}) = p(x_j)(e_j - e_{j-1})
+\]</span></p>
+<p>where <span class="math inline">\(x_j\)</span> is a point in <span class="math inline">\(I_j\)</span> guaranteed by the mean value theorem, and <span class="math inline">\(e_j - e_{j-1}\)</span> denotes the length of <span class="math inline">\(I_j\)</span>.</p>
+<p>We now simplify the original experiment by recording merely the intervals <span class="math inline">\(I_j\)</span> in which the outcome falls, and calling the numerical outcome in this case <span class="math inline">\(x_j\)</span>, the point in <span class="math inline">\(I_j\)</span> appears in the above formula; therefore, the actual outcome falling into <span class="math inline">\(I_j\)</span> differs from <span class="math inline">\(x_j\)</span> by at most <span class="math inline">\(e_j - e_{j-1}\)</span>.</p>
+<p>Now consider the sequence of outcomes <span class="math inline">\(a_1, a_2, ...\)</span> of the <strong>original experiment</strong>. Denote the corresponding outcomes of the simplified experiment by <span class="math inline">\(b_1, b_2, ...\)</span>. The simplified experiment has a finite number of outcomes. For such discrete experiments, we have the expectation</p>
+<p><span class="math display">\[
+\bar{x}_n = \lim\limits_{N \to \infty} \frac{b_1 + \cdots + b_N}{N}
+\]</span></p>
+<p>where <span class="math inline">\(n\)</span> is the number of subintervals of <span class="math inline">\(I\)</span>.</p>
+<p>In fact, the expectation <span class="math inline">\(\bar{x}_n\)</span> of the simplified experiment can also be calculated by formula</p>
+<p><span class="math display">\[
+\bar{x}_n = P_1x_1 + \cdots + P_nx_n
+\]</span></p>
+<p>Then we have</p>
+<p><span class="math display">\[
+\bar{x}_n = p(x_1)x_1(e_1 - e_0) + \cdots + p(x_n)x_n(e_n - e_{n-1})
+\]</span></p>
+<p>As <span class="math inline">\(n \to \infty\)</span>, we have</p>
+<p><span class="math display">\[
+\bar{x} = \lim\limits_{n \to \infty} \sum_{i=1}^n x_ip(x_i)\Delta x_i = \int_{e_0}^{e_n} xp(x)\mathrm{d}x
+\]</span></p>
+<p>So we conclude</p>
+<p><span class="math display">\[
+\bar{x} = \int_{-\infty}^{\infty} xp(x)\mathrm{d}x
+\]</span></p>
+</div>
+</div>
+<ol start="9" type="1">
+<li>The probability density of a combined experiment of two experiments independent of each other:</li>
+</ol>
+<ul>
+<li>Case 1: the outcome of the first experiment may be any real number, but the second experiment can have only a finite number of outcomes.</li>
+</ul>
+<p>Denote by <span class="math inline">\(P(a)\)</span> the probability of <span class="math inline">\(x &lt; a\)</span>. The second experiment has <span class="math inline">\(n\)</span> possible outcomes <span class="math inline">\(a_1, ..., a_n\)</span> with probabilities <span class="math inline">\(Q_1, ..., Q_n\)</span>.</p>
+<p><strong>We define <em>the numerical outcome of the combined experiment</em> to be <em>the sum of the separate numerical outcomes of the two experiments</em> that constitute it.</strong></p>
+<p>We denote by <span class="math inline">\(E(x)\)</span> the event that the numerical outcome of the combined experiment is less than <span class="math inline">\(x\)</span>, and denote its probability by <span class="math inline">\(U(x)\)</span>.</p>
+<p>Then we have</p>
+<p><span class="math display">\[
+U(x) = Q_1P(x-a_1) + \cdots + Q_nP(x-a_n)
+\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We denote by <span class="math inline">\(E_j(x)\)</span> the event that the numerical outcome of the second experiment is <span class="math inline">\(a_j\)</span>. The numerical outcome of the combined experiment is then less than <span class="math inline">\(x\)</span> if and only if the numerical outcome of the first experiment is less than <span class="math inline">\(x - a_j\)</span>.</p>
+<p>Then we have</p>
+<p><span class="math display">\[
+E(x) = E_1(x) \cup \cdots \cup E_n(x)
+\]</span></p>
+<p>where the events <span class="math inline">\(E_j(x)\)</span> are disjoint.</p>
+<p>It follows from <strong>the addition rule for disjoint events</strong> that</p>
+<p><span class="math display">\[
+U(x) = P(E_1(x)) + \cdots + P(E_n(x))
+\]</span></p>
+<p>Since the two experiments are independent, we have <span class="math inline">\(P(E_j(x)) = Q_j P(x-a_j)\)</span>.</p>
+<p>So we have</p>
+<p><span class="math display">\[
+U(x) = Q_1P(x-a_1) + \cdots + Q_nP(x-a_n)
+\]</span></p>
+</div>
+</div>
+<ul>
+<li>Case 2: both experiments can have any real number as outcome.</li>
+</ul>
+<p>Denote by <span class="math inline">\(P(a)\)</span> and <span class="math inline">\(Q(a)\)</span> the probabilities that the outcome is less than <span class="math inline">\(a\)</span> in each of the two experiments, respectively.</p>
+<p>Assume the outcome of the second experiment always lies in some finite interval <span class="math inline">\(I\)</span>. Then we subdivide <span class="math inline">\(I\)</span> into a finite number <span class="math inline">\(n\)</span> of subintervals <span class="math inline">\(I_j = [e_{j-1}, e_j)\)</span>. Let <span class="math inline">\(Q_j\)</span> denote the probability of the outcome of the experiment lying in <span class="math inline">\(I_j\)</span>.</p>
+<p>Suppose <span class="math inline">\(Q(x)\)</span> is continuously differentiable and denote its derivative by <span class="math inline">\(q(x)\)</span>.</p>
+<p>According to the mean value theorem, we have</p>
+<p><span class="math display">\[
+Q_j = Q(e_j) - Q(e_{j-1}) = q(a_j)(e_j - e_{j-1})
+\]</span></p>
+<p>where <span class="math inline">\(a_j\)</span> is some point in <span class="math inline">\(I_j\)</span>.</p>
+<p>We discretize the second experiment by lumping together all outcomes that lie in <span class="math inline">\(I_j\)</span> and redefine the numerical outcome in that case to be <span class="math inline">\(a_j\)</span>.</p>
+<p>Then we have</p>
+<p><span class="math display">\[
+\begin{aligned}
+U_n(x) &amp; = q(a_1)P(x-a_1)(e_1-e_0) + \cdots + q(a_n)P(x-a_n)(e_n-e_{n-1}) \\
+       &amp; = \sum_{i=1}^{n} q(a_i)p(x-a_i)\Delta a_i
+\end{aligned}
+\]</span></p>
+<p>As <span class="math inline">\(n \to \infty\)</span>, we have</p>
+<p><span class="math display">\[
+\begin{aligned}
+U(x) &amp; = \lim\limits_{n \to \infty} U_n(x) \\
+     &amp; = \lim\limits_{n \to \infty} \sum_{i=1}^{n} q(a_i)p(x-a_i)\Delta a_i \\
+     &amp; = \int\limits_{I} q(a)P(x-a)\mathrm{d}a
+\end{aligned}
+\]</span></p>
+<p>Then we have</p>
+<p><span class="math display">\[
+U(x) = \int_{-\infty}^{\infty} q(a)P(x-a)\mathrm{d}a
+\]</span></p>
+<p>Further, let us suppose <span class="math inline">\(P(x)\)</span> is continuously differentiable, and denote its derivative by <span class="math inline">\(p(x)\)</span>.</p>
+<p>Then we have</p>
+<p><span class="math display">\[
+u(x) = \int_{-\infty}^{\infty} q(a)p(x-a)\mathrm{d}a
+\]</span></p>
+<p>where <span class="math inline">\(u(x)\)</span> is the derivative of <span class="math inline">\(U(x)\)</span>.</p>
+<p>In a word, we have proved the following fact:</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Consider two independent experiments whose outcomes lie in some finite interval and have probability <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> respectively.</p>
+<p>In the combined experiment of the two experiments, define the outcome of the combined experiment to be the sum of the outcomes of the individual experiments.</p>
+<p>Then the combined experiment has the probability density:</p>
+<p><span class="math display">\[
+u(x) = \int_{-\infty}^{\infty} q(a)p(x-a)\mathrm{d}a
+\]</span></p>
+</div>
+</div>
+<ol start="10" type="1">
+<li>The convolution of the functions <span class="math inline">\(q\)</span> and <span class="math inline">\(p\)</span>:</li>
+</ol>
+<p>The function <span class="math inline">\(u\)</span> defined by <span class="math inline">\(u(x) = \int_{-\infty}^{\infty} q(a)p(x-a)\mathrm{d}a\)</span> is called the convolution of the functions <span class="math inline">\(q\)</span> and <span class="math inline">\(p\)</span>. This relation is denoted by <span class="math inline">\(u = q*p\)</span>.</p>
+<p>The convolution has the following properties:</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Let <span class="math inline">\(q_1\)</span>, <span class="math inline">\(q_2\)</span>, and <span class="math inline">\(p\)</span> be continuous functions defined for all real numbers <span class="math inline">\(x\)</span>, and assume the functions are <span class="math inline">\(0\)</span> outside a finite interval. Then we have</p>
+<ul>
+<li><p>Convolution is distributive: <span class="math inline">\((q_1+q_2)*p = q_1*p + q_2*p\)</span>.</p></li>
+<li><p>Let <span class="math inline">\(k\)</span> be any constant. Then <span class="math inline">\((kq)*p = k(q*p)\)</span>.</p></li>
+<li><p>Convolution is commutative: <span class="math inline">\(q*p = p*q\)</span>.</p></li>
+<li><p>The integral of the convolution is the product of the integrals of the factors:</p></li>
+</ul>
+<p><span class="math display">\[
+\int_{-\infty}^{\infty} u(x) \mathrm{d}x = \int_{-\infty}^{\infty} p(x) \mathrm{d}x \int_{-\infty}^{\infty} q(a) \mathrm{d}a
+\]</span></p>
+</div>
+</div>
 </section>
 </section>
 </section>
