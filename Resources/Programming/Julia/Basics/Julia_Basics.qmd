@@ -2974,7 +2974,7 @@ One can also refer to those names outside their parent module by prefixing them 
 
 The parent module may be accessible using a chain of submodules like `Base.Math.sin`, where `Base.Main` is called the module path.
 
-Due to syntactic ambiguities, qualifying a name that contains only symbols, such as an operator, requires inserting a colon, e.g. `Base.:+`. A small number of operators additonally require parentheses, e.g. `Base.:(==)`.
+Due to syntactic ambiguities, qualifying a name that contains only symbols, such as an operator, requires inserting a colon, e.g. `Base.:+`. A small number of operators additionally require parentheses, e.g. `Base.:(==)`.
 
 ##### Export lists
 
@@ -3036,7 +3036,7 @@ To avoid doing this every time you run Julia, put this line into your startup fi
 
 3.  Julia looks for files in those directories in the form of a package with the structure: `ModuleName/src/file.jl`.
 
-4.  Or, if not in package form, it will look for a filename that mathes the name of your module.
+4.  Or, if not in package form, it will look for a filename that matches the name of your module.
 
 ### Standard modules
 
@@ -3062,11 +3062,170 @@ Variables defined at the prompt go in Main, and `varinfo()` lists variables in M
 
 ### Packages
 
-Julia uses git for organizing and controling packages.
+Julia uses **git** for organizing and controlling packages.
 
-By convention, all packages are stored in git repositories, with a ".jl" suffix.
+By convention, all packages are stored in git repositories.
 
-## Environments
+### Organizing your code into modules and packages
+
+#### Setting up your working environment
+
+In Julia, different environments can have totally different packages and versions installed from another environment.
+
+This makes it possible that you can construct an environment tailored to your project, which makes your project completely reproducible.
+
+```{julia}
+#| eval: false
+
+## Make the job directory in the shell mode
+shell> mkdir job
+
+## Activate the job environment in the package mode
+(@v1.10) pkg> activate job
+  Activating new project at `~/temp/job`
+
+## Add packages into the job environment
+(job) pkg> add CairoMakie ElectronDisplay
+
+## Check what packages are added into the job environment
+(job) pkg> status
+Status `~/temp/job/Project.toml`
+  [13f3f980] CairoMakie v0.11.5
+  [d872a56f] ElectronDisplay v1.0.1
+
+## Julia adds packages into the job environment by adding information of packages into the following two files of the job environment:
+# 1. Project.toml: specifies what packages are added to this environment
+
+shell> cat Project.toml
+[deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"  # The string is the universally unique identifier (UUID) of the CairoMakie package, which allows you to install different packages with the same package name. If there was another CairoMakie package, you should add this one with the command: add CairoMakie=13f3f980-e62b-5c42-98c6-ff1f3baf88f0
+ElectronDisplay = "d872a56f-244b-5cc9-b574-2017b5b909a8"
+
+# 2. Manifest.toml: specifies the information of packages which those packages we just installed depend on
+
+shell> head Manifest.toml
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.10.0"
+manifest_format = "2.0"
+project_hash = "666c5e651c78c84e1125a572f7fba0bc8b920e62"
+
+[[deps.AbstractFFTs]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "d92ad398961a3ed262d8bf04a1a2b8340f915fef"
+uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
+version = "1.5.0"
+weakdeps = ["ChainRulesCore", "Test"]
+
+    [deps.AbstractFFTs.extensions]
+    AbstractFFTsChainRulesCoreExt = "ChainRulesCore"
+    AbstractFFTsTestExt = "Test"
+
+[[deps.AbstractLattices]]
+git-tree-sha1 = "222ee9e50b98f51b5d78feb93dd928880df35f06"
+uuid = "398f06c4-4d28-53ec-89ca-5b2656b7603d"
+version = "0.3.0"
+```
+
+These two files (`Project.toml` and `Manifest.toml`) are automatically created by Julia.
+
+#### Creating your own module and package
+
+```{julia}
+#| eval: false
+
+shell> cd job
+/home/yangrui/temp/job
+
+shell> tree
+.
+├── Manifest.toml
+└── Project.toml
+
+0 directories, 2 files
+
+## Create a package scaffolding with the `generate` command in the package mode
+# You can also use the PkgTemplate library to create peackages with a more sophisticated way
+(job) pkg> generate ToyPackage
+  Generating  project ToyPackage:
+    ToyPackage/Project.toml
+    ToyPackage/src/ToyPackage.jl
+
+shell> tree
+.
+├── Manifest.toml
+├── Project.toml
+└── ToyPackage
+    ├── Project.toml  # In fact, Julia package is also an environment, which means you can add other packages it depends on
+    └── src
+        └── ToyPackage.jl  # This file contains the top-level module having the same name as the package
+
+2 directories, 4 files
+
+shell> cat ToyPackage/src/ToyPackage.jl
+module ToyPackage  # You can now add code into this module (e.g. import names from other packages by using the `using` and `import` statements; specify what names should be exported by using the `export` statement; include other .jl files by using the `include()` function; you can also directly define variables, functions, types here)
+
+greet() = print("Hello World!")
+
+end # module ToyPackage
+
+## To make packages you are developing available when importing them by using the `using` and `import` statements, you can use the `dev` command to add your package info into the metadata files of the job environment
+(@v1.10) pkg> activate job
+  Activating new project at `~/temp/job/job`
+
+shell> ls
+Manifest.toml  Project.toml  ToyPackage
+
+(job) pkg> dev ./ToyPackage
+   Resolving package versions...
+    Updating `~/temp/job/job/Project.toml`
+  [0bc4f551] + ToyPackage v0.1.0 `../ToyPackage`
+    Updating `~/temp/job/job/Manifest.toml`
+  [0bc4f551] + ToyPackage v0.1.0 `../ToyPackage`
+
+(job) pkg> status
+Status `~/temp/job/job/Project.toml`
+  [0bc4f551] ToyPackage v0.1.0 `../ToyPackage`
+```
+
+Two packages are very useful when modifying and developing packages:
+
+-   OhMyREPL: provides syntax highlighting and history matching in the Julia REPL;
+
+-   Revise: monitors code changes to packages loaded into the REPL and updates the REPL with these changes.
+
+#### Testing your package
+
+You can use the Test package to test your package.
+
+```{julia}
+#| eval: false
+
+## In the ToyPackage/test/runtests.jl  # This is essential
+using ToyPackage
+using Test
+
+# Each test is contained in this block
+@testset "All tests" begin
+    include("trigtests.jl")
+end
+
+## In the ToyPackage/test/trigtests.jl  # This is not essential if you write all tests into the above file
+@testset "trigonometric tests" begin
+    @test cos(0) = 1.0  # Each test starts with the macro @test. For floating-point numbers, the results may be not exactly identical, so you can use the ≈ (\approx) or use the isapprox() function to specify the tolerance
+    @test sin(0) = 0.0
+end
+
+@testset "polynomial tests" begin
+    # Some more tests
+end
+
+## Test your package with the `test` command in the package mode
+(job) pkg> activate ToyPackage  # Of course, this is not essential. You can test the ToyPackage package in any enviroment which knows where this package is (e.g. in the job environment)
+  Activating project at `~/temp/job/ToyPackage`
+
+(ToyPackage) pkg> test ToyPackage  # If you are in the ToyPackage environment, only use the `test` command without the package name is fine
+```
 
 ## Appendices
 
@@ -3096,7 +3255,7 @@ ENV["https_proxy"] = "http://127.0.0.1:10809"
 
 -   `shell>`: the shell mode. Enter shell mode by pressing `;`.
 
-To back to the standard Julia mode, press Backspace.
+To back to the standard Julia mode, press `Backspace`.
 
 ### Installing third-party packages
 
@@ -3109,8 +3268,11 @@ You can install packages either by calling Pkg functions in the standard Julia m
 ```{julia}
 #| eval: false
 
-# To install packages (multiple packages are separated by comma), use add
+# To install packages (multiple packages are separated by comma or space), use add
 (@v1.9) pkg> add JSON, StaticArrays
+
+# To install packages with specified versions using the @ symbol
+(@v1.9) pkg> add CairoMakie@0.5.10
 
 # To remove packages, use rm or remove (some Pkg REPL commands have a short and a long version of the command)
 (@v1.9) pkg> rm JSON, StaticArrays
@@ -3127,7 +3289,7 @@ In the REPL prompt, `(@v1.9)` lets you know that `v1.9` is the active environmen
 
 Different environments can have totally different packages and versions installed from another environment.
 
-This makes it possible that you can constuct an environment tailored to your project, which makes your project completely reproducible.
+This makes it possible that you can construct an environment tailored to your project, which makes your project completely reproducible.
 :::
 
 -   In the standard Julia mode
