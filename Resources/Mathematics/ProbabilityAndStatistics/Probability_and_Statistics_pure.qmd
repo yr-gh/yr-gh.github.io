@@ -3,7 +3,7 @@ title: "Probability and Statistics (Pure)"
 author: "Rui Yang"
 date: last-modified
 format:
-  html:
+  pdf:
     toc: true
     toc-depth: 6
     toc-location: left
