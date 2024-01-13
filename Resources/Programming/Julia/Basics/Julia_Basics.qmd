@@ -1,7 +1,7 @@
 ---
 title: "Julia Basics"
 author: "Rui Yang"
-date: "11/16/2023"
+date: last-modified
 format:
   html:
     toc: true

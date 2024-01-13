@@ -1,7 +1,7 @@
 ---
 title: "Resource List"
 author: "Rui Yang"
-date: "11/22/2023"
+date: last-modified
 format:
   html:
     toc: true
@@ -122,3 +122,17 @@ A unifying parallelization framework at <https://www.futureverse.org/>.
 * 'Makie': a data visualization ecosystem with high performance and extensibility (guide at <https://docs.makie.org/stable>).
 
 * `AlgebraOfGraphics`: defines a language for data visualization based on `Makie` (guide at <https://aog.makie.org/stable>).
+
+## Mathematics
+
+### Calculus
+
+### Linear Algebra
+
+### Probability and Statistics
+
+1. [Basic Probability and Statistics](./Resources/Mathematics/ProbabilityAndStatistics/Probability_and_Statistics_pure.html)
+
+### Applications
+
+1. [Probability and Statistics with Julia](./Resources/Programming/Julia/Applications/Probability_and_Statistics_app.html)

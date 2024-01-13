@@ -1,7 +1,7 @@
 ---
 title: "Probability and Statistics (Pure)"
 author: "Rui Yang"
-date: "01/05/2024"
+date: last-modified
 format:
   html:
     toc: true
@@ -270,7 +270,7 @@ Setting $p = \frac{\mu}{N}$, then we have
 $$
 \begin{aligned}
 b_k(N) & = \dbinom{N}{k} p^k q^{N-k} \\
-       & = \frac{N(N-1)...(N-k+1)}{k!} p^k q^{N-k} \\
+       & = \frac{N(N-1) \cdots (N-k+1)}{k!} p^k q^{N-k} \\
        & = (1-\frac{1}{N}) \cdots (1-\frac{k-1}{N}) \frac{N^kp^k(1-p)^{N-k}}{k!} \\
        & = \frac{(1-\frac{1}{N}) \cdots (1-\frac{k-1}{N})}{(1-p)^k} \frac{\mu^k}{k!} (1-\frac{\mu}{N})^N
 \end{aligned}
