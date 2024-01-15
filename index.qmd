@@ -133,6 +133,10 @@ A unifying parallelization framework at <https://www.futureverse.org/>.
 
 1. [Basic Probability and Statistics](./Resources/Mathematics/ProbabilityAndStatistics/Probability_and_Statistics_pure.html)
 
+2. Misc:
+
+- [The Probability of Random Events](./Resources/Mathematics/ProbabilityAndStatistics/The_Probability_of_Random_Events.pdf)
+
 ### Applications
 
 1. [Probability and Statistics with Julia](./Resources/Programming/Julia/Applications/Probability_and_Statistics_app.html)
